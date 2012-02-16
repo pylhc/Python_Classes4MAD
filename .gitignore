@@ -1,3 +1,7 @@
 *.pyc
 *.gz
 *~
+.__afs*
+.DS_Store
+*.out
+.Makefile*

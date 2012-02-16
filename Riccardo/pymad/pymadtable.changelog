@@ -1,0 +1,16 @@
+8/3/2006:
+added new stuff:
+from pymadtable import *
+t=madtable('twiss.lhcdfthin.dat')
+t.select(t.name,t.range('IP3','MQWA.B4R3.B1..2'))
+t.select(t.name,t.srange(122,129))
+t.select([t.name,t.s],t.pattern('IP'))
+
+8/3/2006:
+added select function usage:
+from pymadtable import *
+t=madtable('twiss.lhcdfthin.dat')
+t.select(t.name,'IP')
+t.select([t.name,t.s],'IP')
+
+8/3/2006: change dictionary name 'names' to 'idx'

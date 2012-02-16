@@ -1,0 +1,56 @@
+# Generated automatically from Makefile.in by configure.
+# ===> Makefile
+#
+#   Makefile            Xianjun WANG            3/1994
+#
+#   used to compile AUTO libraries
+#   
+#   Changed by Randy Paffenroth 6/1999 for the C version
+#
+F77 = g77 
+FFLAGS = -g -O2
+OPT = -O
+CFLAGS = $(OPT) -Iinclude -I/System/Library/Frameworks/Python.framework/Versions/2.3/include/python2.3
+CC=gcc
+
+OBJ = auto.o autlib1.o autlib2.o autlib3.o autlib4.o autlib5.o eispack.o conpar.o setubv.o reduce.o dmatrix.o
+F2COBJ = libf2c/cabs.o libf2c/d_lg10.o libf2c/i_nint.o libf2c/pow_di.o libf2c/r_lg10.o \
+	 libf2c/z_exp.o libf2c/d_imag.o libf2c/d_sign.o libf2c/i_dnnt.o libf2c/pow_dd.o \
+	 libf2c/pow_ii.o libf2c/z_abs.o libf2c/z_log.o
+
+RM = rm -f
+
+all: header compile libf2c copy
+
+auto: header compile libf2c copy
+
+header: FORCE
+	cp include/auto.h ./auto.h
+
+compile: $(OBJ)
+
+libf2c:  FORCE 
+	cd ./libf2c;$(MAKE)
+
+copy: $(OBJ)
+	ar crs libauto2000.a $(OBJ) $(F2COBJ)
+	mv libauto2000.a ../lib
+	#cp $(OBJ) ../lib
+	$(RM) auto.h
+
+clean:
+	rm -f *.o *.a *.c~
+	cd libf2c;$(MAKE) clean
+
+superclean:
+	rm -f *.o ../lib/*.o ../lib/*.a
+	cd libf2c;$(MAKE) clean
+
+FORCE:
+
+#
+#  DO NOT ADD ANYTHING AFTER THIS LINE
+#
+
+
+

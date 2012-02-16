@@ -1,0 +1,41 @@
+#!/afs/cern.ch/eng/sl/lintrack/Python-2.4.3/bin/python
+
+import readline
+import pexpect
+import re
+import sys
+import os
+from user import home
+
+readline.parse_and_bind("tab: complete")
+fn1=home+'/.history_madx'
+os.system("touch " + fn1)
+readline.read_history_file(fn1)
+
+def i():
+  cmd=''; print 'X: ==> '
+  try:
+    while( 1):
+      cmd=cmd+re.sub('\!.*','',raw_input())
+      if cmd.endswith(';'):
+        p(cmd)
+        cmd=''; print 'X: ==> '
+  except EOFError, pexpect.EOF:
+    pass
+
+def p(string):
+  mad.sendline(string)
+  mad.expect(prompt)
+  print mad.before
+
+
+prg='madx'
+prompt=['\r\nX: ==>\r\n', pexpect.TIMEOUT]
+mad=pexpect.spawn(prg)
+mad.expect(prompt)
+print mad.before;
+#mad.sendline('option,-echo;')
+#mad.expect_exact(prompt)
+
+i()
+readline.write_history_file(fn1)
