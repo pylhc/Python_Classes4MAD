@@ -1,0 +1,25 @@
+table:
+  backreference
+
+
+qdmad:
+  import madtable
+  match definition
+  jacobian routine
+  compile pre penalty, post penalty
+  sequence generation
+  mkakethin
+  check with kickers
+
+
+
+ir5:
+  define a table for left and right ir5
+  define table for the upgrade
+
+
+elems                     ==> row_names,row_index,data,addr,_mkind,rowattr
+row_names,row_index,data  ==> elems,_mkind,addr,rowattr
+row_names                 ==> elems,row_index,data,_mkind,addr,rowattr
+elems,data,addr,row_index,rowattr ==> row_names,_mkind,rowattr
+elems,data,addr,row_index,norowattr ==> row_names

@@ -1,0 +1,13 @@
+
+beam, SEQUENCE=EFF1S ,PARTICLE=electron, energy=1500, RADIATE=false;
+
+call, file= "CLICx.Nominal";
+call, file="changeparameters";
+use, period=EFF1S;
+select, flag=twiss,column=name,keyword,s,l,angle,K1L,K2L,K3L,tilt,E1,E2,type;
+twiss,BETX=64.9999,bety=17.9997,alfx=0.174564E-05,alfy=0.445179E-05,deltap=0.0,file="ff.twiss",save;
+ptc_create_universe;
+ptc_create_layout,model=2,method=6,nst=10;
+ptc_normal,icase=5,no=4,deltap=0.00;
+ptc_end;
+stop;

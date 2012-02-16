@@ -4,4 +4,7 @@
 .__afs*
 .DS_Store
 *.out
+.svn
 .Makefile*
+temp0_lin[xy]
+sussix4drivexxNoO
