@@ -1,10 +1,13 @@
 '''
+.. module:: mapclass25
+
 MAPCLASS is conceived to optimize
 the non-linear aberrations  of the
 Final Focus System of CLIC.
 
+Written February 2006
+
 .. moduleauthor:: Rogelio Tomas <Rogelio.Tomas@cern.ch>
-.. moduledate:: February 2006 
 
 '''
 #!/usr/bin/env python2.5

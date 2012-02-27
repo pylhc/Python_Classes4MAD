@@ -3,7 +3,7 @@ import numpy as np
 import os,sys,shutil
 
 '''
-.. module:: mad2placet
+.. module:: yngve.mad2placet
 
 Holds various functions for converting things in Mad-X into 
 Placet input.
