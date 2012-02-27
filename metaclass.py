@@ -110,6 +110,9 @@ class twiss:
             self.forknames(dictionary)
 
     def chrombeat(self):
+      '''
+       Add dbx/dby to the twiss table
+      '''
       self.dbx=[]
       self.dby=[]
       for i in range(0,len(self.S)): 
@@ -119,6 +122,9 @@ class twiss:
         self.dby.append(ay)
         
     def fterms(self):
+        '''
+         Add f terms to the twiss table
+        '''
         self.f3000= []
         self.f2100= []
         self.f1020= []
@@ -151,6 +157,9 @@ class twiss:
             self.f2000.append(dumm)
             
     def chiterms(self, ListOfBPMS=[]):
+        '''
+         Add chi terms to the twiss table
+        '''
         factMADtoSix=0.0005
         self.chi3000=[]
         self.chi4000=[]
@@ -270,6 +279,9 @@ class twiss:
         self.F1010W=sqrt(self.F1010R**2+self.F1010I**2)
         
     def beatMatrix(self):
+        '''
+         Add RM to the twiss table
+        '''
         self.RM = []
         for j in range(0,len(self.S)):
             self.RM.append(-self.BETX*cos(2*pi*(self.Q1-2*abs(self.MUX[j]-self.MUX)))/sin(2*pi*self.Q1))

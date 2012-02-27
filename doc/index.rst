@@ -15,11 +15,18 @@ top of your python script::
     import sys
     sys.path.append('/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/')
 
+The library is in a git repository, which you can make your own clone of:
+
+.. code-block:: sh
+
+    git clone /afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   metaclass/index
    mapclass/index
    yngve/index
 
