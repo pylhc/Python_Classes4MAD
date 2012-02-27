@@ -20,6 +20,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   mapclass/index
    yngve/index
 
 Indices and tables

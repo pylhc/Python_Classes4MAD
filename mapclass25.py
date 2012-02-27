@@ -1,11 +1,12 @@
-# MAPCLASS is conceived to optimize
-# the non-linear aberrations  of the
-# Final Focus System of CLIC.
-#                                  
-#                                           Rogelio Tomas,
-#                                           February 2006 
-#                                           Rogelio.Tomas@cern.ch
-#
+'''
+MAPCLASS is conceived to optimize
+the non-linear aberrations  of the
+Final Focus System of CLIC.
+
+.. moduleauthor:: Rogelio Tomas <Rogelio.Tomas@cern.ch>
+.. moduledate:: February 2006 
+
+'''
 #!/usr/bin/env python2.5
 
 from numpy import *
@@ -30,7 +31,12 @@ def gammln( xx):
 #########################
 class Map:
 #########################
-    "MAP coefficients from madx-PTC output (fort.18)"
+    '''
+    MAP coefficients from madx-PTC output
+
+    :param int order: Calculate map up to this order
+    :param string filename: Input filename
+    '''
 
     def __init__(self, order=6, filename='fort.18'): 
         ietall=0
@@ -114,6 +120,12 @@ class Map:
 
 
     def offset(self, xory, i):
+        '''
+        Calculate the beam offset
+
+        :param string xory: Which coordinate to calculate for (x,y,px, or py)
+        :param list i: Size of beam in sigma [x,px,y,py]
+        '''
         sx=0
         exec 'mapxory=self.'+xory
         for coeff1 in mapxory:
@@ -132,6 +144,12 @@ class Map:
 
 
     def sigma(self, xory, i):
+        '''
+        Calculate the beam size in sigma.
+
+        :param string xory: Which coordinate to calculate for (x,y,px, or py)
+        :param list i: Size of beam in sigma [x,px,y,py]
+        '''
         sx2=0
         exec 'mapxory=self.'+xory
         for coeff1 in mapxory:
