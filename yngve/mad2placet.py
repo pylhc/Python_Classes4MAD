@@ -2,12 +2,26 @@ import numpy as np
 
 import os,sys,shutil
 
+'''
+.. module:: mad2placet
+
+Holds various functions for converting things in Mad-X into 
+Placet input.
+
+.. moduleauthor:: Yngve Inntjore Levinsen <Yngve.Inntjore.Levinsen@cern.ch>
+
+'''
+
 def errors(errtable,order=8,outfile='placet_new_errors.tcl'):
     '''
      Writes a placet multipole file for
      all elements in the errtable
      Typically add this in the centre of the
      main element...
+
+     :param string errtable: Input file, tfs table, full path
+     :param int order: The highest multipole order to be added
+     :param string outfile: [optional] The output file name
     '''
     fout=file(outfile,'w')
     first=True

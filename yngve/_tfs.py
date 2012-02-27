@@ -33,6 +33,8 @@ def tfs(inputfile):
      as LookUp dictionaries. These extend on normal
      dictionary syntax. We recommend using this function
      for reading tfs files.
+
+     :param string inputfile: tfs file, full path
     '''
     table,params=tfsDict(inputfile)
     return TfsTable(table), TfsSummary(params)
@@ -51,7 +53,6 @@ def tfsDict(inputfile):
     :raises ValueError: In case file path is not found
     :rtype: tuple containing dictionaries (tfs table , summary)
 
-    See also: :mod:`pymad.domain.tfs`
     '''
     params={}
     if not os.path.isfile(inputfile):
