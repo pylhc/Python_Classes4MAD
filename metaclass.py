@@ -2,11 +2,11 @@
 
 
 try:
-	from Numeric import *
-	from LinearAlgebra import *
+        from Numeric import *
+        from LinearAlgebra import *
 except:
-	from numpy import *
-	from numpy import dot as matrixmultiply
+        from numpy import *
+        from numpy import dot as matrixmultiply
 #from numpy.linalg import inv as generalized_inverse
         from numpy.linalg import inv as inverse
         from numpy.linalg import det as determinant
@@ -47,11 +47,11 @@ class twiss:
               line = replace(line, "@" , "@ ")
             if ("@ " in line and "%" in line and "s" not in split(line)[2]) :
                 label=split(line)[1]
-		try:
-                	exec "self."+label+"= "+str(float(split(replace(line, '"', ''))[3]))
-		except:
-			print "Problem parsing:", line
-			print "Going to be parsed as string"
+                try:
+                        exec "self."+label+"= "+str(float(split(replace(line, '"', ''))[3]))
+                except:
+                        print "Problem parsing:", line
+                        print "Going to be parsed as string"
                         try:
                             exec "self."+label+"= \""+replace(split(line)[3], '"', '')+"\""
                         except:
@@ -61,7 +61,7 @@ class twiss:
                 exec "self."+label+"= \""+split(replace(line, '"', ''))[3]+"\""
 
 
-	    if ("* " in line or "*\t" in line) :
+            if ("* " in line or "*\t" in line) :
                 alllabels=split(line)
                 print "alllabels",len(alllabels)
                 for j in range(1,len(alllabels)):
@@ -88,8 +88,8 @@ class twiss:
                       except:
                         exec "self."+alllabels[j+1]+".append(\""+values[j]+"\")" #To allow with or without ""
                       if "NAME"==alllabels[j+1]:
-                      	self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
-                      	self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
+                              self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
+                              self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
                         self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
 
         f.close()
@@ -263,7 +263,7 @@ class twiss:
             g21 = self.ALFY[j]/sqrt(self.BETY[j])
             g22 = sqrt(self.BETY[j])
             Gb = reshape(array([g11,g12,g21,g22]),(2,2))
-	    C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
+            C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
             gamma=1-determinant(C)
             self.gamma.append(gamma)
             C = ravel(C)
@@ -291,37 +291,37 @@ class twiss:
 
 
     def abh(self,bet1,alf1,KL,K):
-	    """ bet1 and alf1 at the end of the element """
-	    gamma1=(1.+alf1**2)/bet1
-	    KL2=2.*KL
-	    sinhc=sinh(KL2)/KL2
-	    res=0.5*bet1*(1.+sinhc)+alf1*sinh(KL)**2./KL/K+(sinhc-1.)/(2.*K**2.)*gamma1
-	    return res
+            """ bet1 and alf1 at the end of the element """
+            gamma1=(1.+alf1**2)/bet1
+            KL2=2.*KL
+            sinhc=sinh(KL2)/KL2
+            res=0.5*bet1*(1.+sinhc)+alf1*sinh(KL)**2./KL/K+(sinhc-1.)/(2.*K**2.)*gamma1
+            return res
 
 
     def ab(self,bet1,alf1,KL,K):
-	    """ bet1 and alf1 at the end of the element """
-	    gamma1=(1.+alf1**2)/bet1
-	    KL2=2.*KL
-	    sinc=sin(KL2)/KL2
-	    res=0.5*bet1*(1.+sinc)+alf1*sin(KL)**2./KL/K+(1.-sinc)/(2.*K**2.)*gamma1
-	    return res
-	    
-		
-		
+            """ bet1 and alf1 at the end of the element """
+            gamma1=(1.+alf1**2)/bet1
+            KL2=2.*KL
+            sinc=sin(KL2)/KL2
+            res=0.5*bet1*(1.+sinc)+alf1*sin(KL)**2./KL/K+(1.-sinc)/(2.*K**2.)*gamma1
+            return res
+            
+                
+                
 
     def AveBetas(self):
-	    for i in range(len(self.S)):
-	        if self.L[i]>0:
-		    k=sqrt(abs(self.K1L[i])/self.L[i])
-		    kL=k*self.L[i]
-		    
-		    if self.K1L[i] >= 0.0:
-			    print self.NAME[i],self.S[i], self.L[i], self.ab(self.BETX[i],self.ALFX[i], kL, k), self.abh(self.BETY[i],self.ALFY[i], kL, k)
-		    if self.K1L[i] < 0:
-			    print self.NAME[i],self.S[i], self.L[i], self.abh(self.BETX[i],self.ALFX[i], kL, k), self.ab(self.BETY[i],self.ALFY[i], kL, k)
-		else:
-		    print self.NAME[i],self.S[i], self.L[i], self.BETX[i], self.BETY[i]
+            for i in range(len(self.S)):
+                if self.L[i]>0:
+                    k=sqrt(abs(self.K1L[i])/self.L[i])
+                    kL=k*self.L[i]
+                    
+                    if self.K1L[i] >= 0.0:
+                            print self.NAME[i],self.S[i], self.L[i], self.ab(self.BETX[i],self.ALFX[i], kL, k), self.abh(self.BETY[i],self.ALFY[i], kL, k)
+                    if self.K1L[i] < 0:
+                            print self.NAME[i],self.S[i], self.L[i], self.abh(self.BETX[i],self.ALFX[i], kL, k), self.ab(self.BETY[i],self.ALFY[i], kL, k)
+                else:
+                    print self.NAME[i],self.S[i], self.L[i], self.BETX[i], self.BETY[i]
 
 # Read the twiss class from the twiss file
 #x=twiss('twiss')
