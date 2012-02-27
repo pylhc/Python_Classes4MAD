@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 
-try:
-        from Numeric import *
-        from LinearAlgebra import *
-except:
-        from numpy import *
-        from numpy import dot as matrixmultiply
+#try:
+#    from Numeric import *
+#    from LinearAlgebra import *
+#except:
+from numpy import *
+from numpy import dot as matrixmultiply
 #from numpy.linalg import inv as generalized_inverse
-        from numpy.linalg import inv as inverse
-        from numpy.linalg import det as determinant
+from numpy.linalg import inv as inverse
+from numpy.linalg import det as determinant
 
 
 from string import split
@@ -78,19 +78,19 @@ class twiss:
                 values=split(line)
                 for j in range(0,len(values)):
                     if ("%hd" in alltypes[j+1]):                      
-                      exec "self."+alllabels[j+1]+".append("+str(int(values[j]))+")"
+                        exec "self."+alllabels[j+1]+".append("+str(int(values[j]))+")"
                     
                     if ("%le" in alltypes[j+1]):                      
-                      exec "self."+alllabels[j+1]+".append("+str(float(values[j]))+")"
+                        exec "self."+alllabels[j+1]+".append("+str(float(values[j]))+")"
                     if ("s" in alltypes[j+1]):
                       try:
-                        exec "self."+alllabels[j+1]+".append("+values[j]+")"
+                          exec "self."+alllabels[j+1]+".append("+values[j]+")"
                       except:
-                        exec "self."+alllabels[j+1]+".append(\""+values[j]+"\")" #To allow with or without ""
+                          exec "self."+alllabels[j+1]+".append(\""+values[j]+"\")" #To allow with or without ""
                       if "NAME"==alllabels[j+1]:
-                              self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
-                              self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
-                        self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
+                          self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
+                          self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
+                          self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
 
         f.close()
         try:
@@ -240,6 +240,9 @@ class twiss:
 
 
     def Cmatrix(self):
+        '''
+         Calculate the C matrix
+        '''
         self.C = []
         self.gamma = []
         self.f1001 = []
