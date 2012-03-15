@@ -19,6 +19,8 @@ Usage example::
     from yngve import tfs
     t_table,sum_table=tfs('my_twiss.tfs')
 
+See also :mod:`metaclass` which might be more suitable to your needs.
+
 Automatic documentation
 =======================
 
