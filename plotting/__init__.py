@@ -1,3 +1,3 @@
-from _betabeat import betabeat
-from _dispersion import dispersion
-from _ndispersion import normdispersion
+from _betabeat import BetaBeat
+from _dispersion import Dispersion
+from _ndispersion import NormDispersion

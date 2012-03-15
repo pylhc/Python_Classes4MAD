@@ -20,41 +20,54 @@ class plotter:
         '''
         return getattr(self,value)
 
-    def plot(filename,tmp_file='gplot.tmp'):
+    def plot(self,filename=None,tmp_file='gplot.tmp.gp'):
         '''
         Function plots to filename
         usually called by init functions
         of child classes.
         '''
-        self.filename=filename
+        if filename:
+            self.filename=filename
         script=file(tmp_file,'w')
-        mac=file(self.get_macro_file(),'r')
+        mac=file(self.get_macro_file(),'r').read()
         script.write(mac % self)
         script.close()
-        os.system('gnuplot '+tmp_name)
+        os.system('gnuplot '+tmp_file)
 
-    def _set_ranges(xmin,xmax,ymin,ymax,y2min=None,y2max=None):
-        '''
-        Sets the ranges. This function is meant to
-        be used internally by the init functions
-        '''
-        self.xmin=0.0
-        self.xmax=26600
-        if y2min==None:
-            self.y2min=ymin
-        else:
-            self.y2min=y2min
-        if y2max==None:
-            self.y2max=ymax
-        else:
-            self.y2max=y2max
-
-    def get_macro_file():
+    def get_macro_file(self):
         '''
         Returns the full path to
         the macro file
         '''
         return os.path.join(macros_path,self.macro) 
 
+    def _set_ranges(self,xmin,xmax,ymin,ymax,ymin2=None,ymax2=None):
+        '''
+        Sets the ranges. This function is meant to
+        be used internally by the init functions
+        '''
+        self.xmin=0.0
+        self.xmax=26600
+        self.ymin=ymin
+        self.ymax=ymax
 
+        if ymin2==None:
+            self.ymin2=ymin
+        else:
+            self.ymin2=ymin2
 
+        if ymax2==None:
+            self.ymax2=ymax
+        else:
+            self.ymax2=ymax2
+
+    def _init_filename(self,out_folder,filename):
+        '''
+         Used by the __init__ funtions
+        '''
+        if out_folder:
+            if not os.path.isdir(out_folder):
+                os.makedirs(out_folder)
+            self.filename=os.path.join(out_folder,filename+self.fname_end)
+        else:
+            self.filename=filename+self.fname_end

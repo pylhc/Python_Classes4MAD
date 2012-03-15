@@ -1,27 +1,35 @@
 import _plotter
 
 
-class betabeat(_plotter.plotter):
+class BetaBeat(_plotter.plotter):
     def __init__(self,
             dir1,
             dir2,
             title1='Before',
             title2='After',
             filename='betabeat',
+            out_folder='',
             xmin=0.0,
             xmax=26600.0,
+            energy=450,
             ymin='*',
             ymax='*',
-            y2min=None,
-            y2max=None,
+            ymin2=None,
+            ymax2=None,
             plot=True
             ):
         '''
         Plot the famous betabeat plot
         '''
-        super(betabeat,self).__init__(dir1,dir2,macro='betabeat.gp')
-        self._set_ranges(xmin,xmax,ymin,ymax,y2min,y2max)
+        _plotter.plotter.__init__(self,dir1,dir2,macro='betabeat.gp')
+        self.title1=title1
+        self.title2=title2
+
+        self.energy_in_gev=energy
+
+        self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
+
+        self._init_filename(out_folder,filename)
+
         if plot:
-            self.plot(filename+self.fname_end)
-        else:
-            self.filename=filename+self.fname_end
+            self.plot()
