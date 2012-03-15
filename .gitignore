@@ -1,6 +1,7 @@
 *.pyc
 *.gz
 *~
+*.swp
 .__afs*
 .DS_Store
 *.out
