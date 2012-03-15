@@ -28,6 +28,7 @@ Contents:
 
    metaclass/index
    mapclass/index
+   plotting/index
    yngve/index
 
 Indices and tables
