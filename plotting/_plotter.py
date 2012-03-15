@@ -61,7 +61,12 @@ class plotter:
         if ymax2==None:
             self.ymax2=ymax
         else:
-            self.ymax2=ymax2
+            self.ymax2=ymax2a
+
+        if self.ymax=='*' or self.ymin2=='*':
+            return 0
+        if self.ymax==-self.ymin2:
+            self.ymax-=0.01
 
     def _init_filename(self,out_folder,filename):
         '''

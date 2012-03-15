@@ -26,7 +26,7 @@ set origin 0, 0.5
 set size 1,0.525
 set noxtics
 unset key
-l=-0.3
+l=%(yminl)s
 set label "IR3" at 3000, l
 set label "IR4" at 6000, l
 set label "IR5" at 9100, l

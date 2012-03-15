@@ -30,8 +30,8 @@ class BetaBeat(_plotter.plotter):
             xmin='*',
             xmax=26600.0,
             energy=450,
-            ymin='*',
-            ymax='*',
+            ymin=-0.4,
+            ymax=0.4,
             ymin2=None,
             ymax2=None,
             plot=True
@@ -43,6 +43,10 @@ class BetaBeat(_plotter.plotter):
         self.energy_in_gev=energy
 
         self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
+        if self.ymin=='*':
+            self.yminl=-0.3
+        else:
+            self.yminl=self.ymin+0.05
 
         self._init_filename(out_folder,filename)
 
