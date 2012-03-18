@@ -42,33 +42,28 @@ class BetaBeat(_plotter.plotter):
             plot=True
             ):
         if dir2:
-            macro='betabeat.gp'
+            macro='base.gp'
         else:
-            macro='betabeat1.gp'
+            macro='base1.gp'
         _plotter.plotter.__init__(self,dir1,dir2,beam=beam,macro=macro)
         self.title1=title1
         self.title2=title2
         self.title=title
 
-        self.data1_p1='betax'
-        self.data1_p2='betax'
-        self.data2_p1='betax'
-        self.data2_p2='betax'
-        if free_1:
-            self.data1_p1+='_free'
-            self.data1_p2+='_free'
-        if free_2:
-            self.data2_p1+='_free'
-            self.data2_p2+='_free'
-
+        self._set_datasets(free_1,free_2,'beta')
 
         self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
-        if self.ymin=='*':
-            self.yminl=-0.3
-        else:
-            self.yminl=self.ymin+0.05
+
+        self._set_yminl()
 
         self._init_filename(out_folder,filename)
+
+        self.ylabel1="{/Symbol Db/b}_y"
+        self.ylabel2="{/Symbol Db/b}_x"
+
+        self.xfunc="2"
+        self.yfunc="(($4-$10)/$10)"
+        self.errfunc="(sqrt($6**2+$5**2)/$10)"
 
         if plot:
             self.plot()

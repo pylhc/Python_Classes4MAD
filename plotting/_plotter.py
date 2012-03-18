@@ -35,10 +35,14 @@ class plotter:
         if filename:
             self.filename=filename
         script=file(tmp_file,'w')
+        if 'base' in self.macro:
+            if not hasattr(self,'yfunc2'):
+                self.yfunc2=self.yfunc
         mac=file(self.get_macro_file(),'r').read()
         script.write(mac % self)
         script.close()
-        os.system('gnuplot '+tmp_file)
+        if os.system('gnuplot '+tmp_file):
+            raise ValueError("Gnuplot exited with an error on script "+tmp_file)
 
     def get_macro_file(self):
         '''
@@ -85,3 +89,25 @@ class plotter:
     def _get_xticks(self):
         fpath=os.path.join(macros_path,'xtics_b'+str(self.beam)+'.gp')
         return file(fpath,'r').read()
+
+    def _set_datasets(self,free_1,free_2,base,base2=None):
+        if not base2:
+            base2=base
+        self.data1_p1=base+'x'
+        self.data2_p1=base+'x'
+        self.data1_p2=base2+'y'
+        self.data2_p2=base2+'y'
+        if free_1:
+            self.data1_p1+='_free'
+            self.data1_p2+='_free'
+        if free_2:
+            self.data2_p1+='_free'
+            self.data2_p2+='_free'
+    def _set_yminl(self):
+        if self.ymin2=='*':
+            self.yminl=-1.0
+        else:
+            if self.ymin2<0:
+                self.yminl=0.9*self.ymin2
+            else:
+                self.yminl=1.1*self.ymin2

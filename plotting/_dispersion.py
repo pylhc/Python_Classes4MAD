@@ -8,6 +8,8 @@ class Dispersion(_plotter.plotter):
 
     :param dir1: Folder where result 1 is located
     :param dir2: Folder where result 2 is located
+    :param beam: 1 or 2
+    :param title: Plot title
     :param title1: Data set title for result 1
     :param title2: Data set title for result 2
     :param filename: filename of plot (no file ending)
@@ -21,9 +23,11 @@ class Dispersion(_plotter.plotter):
     '''
     def __init__(self,
             dir1,
-            dir2,
+            dir2='',
+            title='LHCB1 450 GeV',
             title1='Before',
             title2='After',
+            beam=1,
             filename='dispersion',
             out_folder='',
             xmin=0.0,
@@ -33,15 +37,33 @@ class Dispersion(_plotter.plotter):
             ymax='*',
             ymin2=None,
             ymax2=None,
+            free_1=False,
+            free_2=False,
             plot=True
             ):
-        _plotter.plotter.__init__(self,dir1,dir2,macro='dispersion.gp')
+        if dir2:
+            macro='base.gp'
+        else:
+            macro='base1.gp'
+        _plotter.plotter.__init__(self,dir1,dir2,beam=beam,macro=macro)
         self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
+
         self.title1=title1
         self.title2=title2
+        self.title=title
 
-        self.energy_in_gev=energy
+        self._set_datasets(free_1,free_2,'D')
 
         self._init_filename(out_folder,filename)
+
+        self._set_yminl()
+
+        self.ylabel1="{/Symbol D}D_{x} [m]"
+        self.ylabel2="{/Symbol D}D_{y} [m]"
+
+        self.xfunc="2"
+        self.yfunc="($4-$7)"
+        self.errfunc="5"
+
         if plot:
             self.plot()
