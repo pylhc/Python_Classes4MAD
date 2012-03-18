@@ -21,7 +21,7 @@ class NormDispersion(_plotter.plotter):
     '''
     def __init__(self,
             dir1,
-            dir2,
+            dir2='',
             title='LHCB1 450 GeV',
             title1='Before',
             title2='After',
