@@ -9,6 +9,8 @@ class BetaBeat(_plotter.plotter):
 
     :param dir1: Folder where result 1 is located
     :param dir2: Folder where result 2 is located
+    :param beam: 1 or 2
+    :param title: Plot title
     :param title1: Data set title for result 1
     :param title2: Data set title for result 2
     :param filename: filename of plot (no file ending)
@@ -22,25 +24,43 @@ class BetaBeat(_plotter.plotter):
     '''
     def __init__(self,
             dir1,
-            dir2,
+            dir2='',
+            title='LHCB1 450 GeV',
             title1='Before',
             title2='After',
             filename='betabeat',
             out_folder='',
+            beam=1,
             xmin='*',
             xmax=26600.0,
-            energy=450,
             ymin=-0.4,
             ymax=0.4,
             ymin2=None,
             ymax2=None,
+            free_1=False,
+            free_2=False,
             plot=True
             ):
-        _plotter.plotter.__init__(self,dir1,dir2,macro='betabeat.gp')
+        if dir2:
+            macro='betabeat.gp'
+        else:
+            macro='betabeat1.gp'
+        _plotter.plotter.__init__(self,dir1,dir2,beam=beam,macro=macro)
         self.title1=title1
         self.title2=title2
+        self.title=title
 
-        self.energy_in_gev=energy
+        self.data1_p1='betax'
+        self.data1_p2='betax'
+        self.data2_p1='betax'
+        self.data2_p2='betax'
+        if free_1:
+            self.data1_p1+='_free'
+            self.data1_p2+='_free'
+        if free_2:
+            self.data2_p1+='_free'
+            self.data2_p2+='_free'
+
 
         self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
         if self.ymin=='*':

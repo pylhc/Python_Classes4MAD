@@ -8,12 +8,16 @@ class plotter:
     def __init__(self,
             dir1,
             dir2,
-            macro):
+            macro,
+            beam=1):
         self.dir1=dir1
         self.dir2=dir2
         self.macro=macro
         self.fname_end='.eps'
         self.terminal='postscript enhanced color solid 22'
+        self.beam=beam
+        self.xtics_plot2=self._get_xticks()
+
 
     def __getitem__(self,value):
         '''
@@ -61,7 +65,7 @@ class plotter:
         if ymax2==None:
             self.ymax2=ymax
         else:
-            self.ymax2=ymax2a
+            self.ymax2=ymax2
 
         if self.ymax=='*' or self.ymin2=='*':
             return 0
@@ -78,3 +82,6 @@ class plotter:
             self.filename=os.path.join(out_folder,filename+self.fname_end)
         else:
             self.filename=filename+self.fname_end
+    def _get_xticks(self):
+        fpath=os.path.join(macros_path,'xtics_b'+str(self.beam)+'.gp')
+        return file(fpath,'r').read()

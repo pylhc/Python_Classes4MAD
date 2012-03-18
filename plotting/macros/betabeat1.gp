@@ -1,3 +1,4 @@
+
 set terminal %(terminal)s
 set output "%(filename)s"
 
@@ -18,8 +19,7 @@ set xrange [%(xmin)s:%(xmax)s]
 set yrange [%(ymin)s:%(ymax)s]
 
 plot \
-   "< awk '$6<20{print }' %(dir1)s/get%(data1_p1)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10)  t "%(title1)s" w e pt 7 lw 2 ps 0.8 lt 1, \
-   "< awk '$6<20{print }' %(dir2)s/get%(data2_p1)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10)  t "%(title2)s" w e pt 7 lw 2 ps 0.8 lt 3
+   "< awk '$6<20{print }' %(dir1)s/get%(data1_p1)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10)  t "%(title1)s" w e pt 7 lw 2 ps 0.8 lt 1
 
 set nolabel
 set origin 0, 0.5
@@ -34,5 +34,4 @@ set xlabel""
 set yrange [%(ymin2)s:%(ymax2)s]
 
 plot  \
-    "< awk '$6<20{print }' %(dir1)s/get%(data1_p2)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10) w e pt 7 lw 2 ps 0.8 lt 1, \
-    "< awk '$6<20{print }' %(dir2)s/get%(data2_p2)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10) w e pt 7 lw 2 ps 0.8 lt 3
+    "< awk '$6<20{print }' %(dir1)s/get%(data1_p2)s.out" u 2:(($4-$10)/$10):(sqrt($6**2+$5**2)/$10) w e pt 7 lw 2 ps 0.8 lt 1
