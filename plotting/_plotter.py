@@ -1,8 +1,9 @@
 import os
-
+from _append import __get_append__
 
 
 macros_path=os.path.join(os.path.dirname(__file__),'macros')
+ 
 
 class plotter:
     def __init__(self,
@@ -34,7 +35,10 @@ class plotter:
         '''
         if filename:
             self.filename=filename
-        script=file(tmp_file,'w')
+        if __get_append__():
+            script=file(tmp_file,'a')
+        else:
+            script=file(tmp_file,'w')
         if 'base' in self.macro:
             if not hasattr(self,'yfunc2'):
                 self.yfunc2=self.yfunc

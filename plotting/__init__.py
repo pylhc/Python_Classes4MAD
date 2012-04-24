@@ -11,7 +11,7 @@ This module contains easy to use macros for presentable plots using gnuplot. A s
 .. moduleauthor:: Yngve Inntjore Levinsen <yngve.inntjore.levinsen@cern.ch>
 """
 
-from _betabeat import BetaBeat
-from _dispersion import Dispersion
-from _ndispersion import NormDispersion
-
+from BetaBeat import BetaBeat
+from Dispersion import Dispersion
+from NormDispersion import NormDispersion
+from _append import set_append

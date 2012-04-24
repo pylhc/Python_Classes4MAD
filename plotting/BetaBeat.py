@@ -1,8 +1,9 @@
 import _plotter
 
-class Dispersion(_plotter.plotter):
+
+class BetaBeat(_plotter.plotter):
     '''
-    Plot the dispersion.
+    Plot the famous betabeat plot.
 
     Only dir1 and dir2 are required input.
 
@@ -20,6 +21,9 @@ class Dispersion(_plotter.plotter):
     :param ymax: y-axis maximum value
     :param ymin2: y-axis minimum value, 2. plot
     :param ymax2: y-axis maximum value, 2. plot
+    :param free_1: Use free data for dir1 data
+    :param free_2: Use free data for dir2 data
+    :param plot: Run the plot script immediately
     '''
     def __init__(self,
             dir1,
@@ -27,12 +31,11 @@ class Dispersion(_plotter.plotter):
             title='LHCB1 450 GeV',
             title1='Before',
             title2='After',
-            beam=1,
-            filename='dispersion',
+            filename='betabeat',
             out_folder='',
-            xmin=0.0,
+            beam=1,
+            xmin='*',
             xmax=26600.0,
-            energy=450,
             ymin='*',
             ymax='*',
             ymin2=None,
@@ -46,24 +49,24 @@ class Dispersion(_plotter.plotter):
         else:
             macro='base1.gp'
         _plotter.plotter.__init__(self,dir1,dir2,beam=beam,macro=macro)
-        self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
-
         self.title1=title1
         self.title2=title2
         self.title=title
 
-        self._set_datasets(free_1,free_2,'D')
+        self._set_datasets(free_1,free_2,'beta')
 
-        self._init_filename(out_folder,filename)
+        self._set_ranges(xmin,xmax,ymin,ymax,ymin2,ymax2)
 
         self._set_yminl()
 
-        self.ylabel1="{/Symbol D}D_{x} [m]"
-        self.ylabel2="{/Symbol D}D_{y} [m]"
+        self._init_filename(out_folder,filename)
+
+        self.ylabel1="{/Symbol Db/b}_y"
+        self.ylabel2="{/Symbol Db/b}_x"
 
         self.xfunc="2"
-        self.yfunc="($4-$7)"
-        self.errfunc="5"
+        self.yfunc="(($4-$10)/$10)"
+        self.errfunc="(sqrt($6**2+$5**2)/$10)"
 
         if plot:
             self.plot()
