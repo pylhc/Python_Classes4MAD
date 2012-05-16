@@ -326,6 +326,15 @@ class twiss:
                 else:
                     print self.NAME[i],self.S[i], self.L[i], self.BETX[i], self.BETY[i]
 
+
+    def I5(self):
+        H=0
+        for i in range(len(self.NAME)):
+           H=H+ (self.DX[i]**2+(self.DPX[i]*self.BETX[i]+self.DX[i]*self.ALFX[i])**2)/self.BETX[i]* (abs(self.ANGLE[i]))**3/self.L[i]**2
+
+        return H
+
+
 # Read the twiss class from the twiss file
 #x=twiss('twiss')
 # use it as:
