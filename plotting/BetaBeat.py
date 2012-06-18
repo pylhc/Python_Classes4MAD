@@ -61,8 +61,8 @@ class BetaBeat(_plotter.plotter):
 
         self._init_filename(out_folder,filename)
 
-        self.ylabel1="{/Symbol Db/b}_y"
-        self.ylabel2="{/Symbol Db/b}_x"
+        self.ylabel1="{/Symbol Db/b}_x"
+        self.ylabel2="{/Symbol Db/b}_y"
 
         self.xfunc="2"
         self.yfunc="(($4-$10)/$10)"
