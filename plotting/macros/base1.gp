@@ -36,10 +36,10 @@ set xlabel ""
 set yrange [%(ymin2)s:%(ymax2)s]
 
 plot  \
-    "< awk '$6<20{print }' %(dir1)s/get%(data1_p2)s.out" u %(xfunc)s:%(yfunc2)s:%(errfunc)s w e pt 7 lw 2 ps 0.8 lt 1
+    "< awk '$6<20{print }' %(dir1)s/get%(data1_p2)s.out" u %(xfunc)s:%(yfunc2)s:%(errfunc2)s w e pt 7 lw 2 ps 0.8 lt 1
 
 unset multiplot
-
+reset
 ##
 # End of plot
 ##
