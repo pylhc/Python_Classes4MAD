@@ -14,4 +14,5 @@ This module contains easy to use macros for presentable plots using gnuplot. A s
 from BetaBeat import BetaBeat
 from Dispersion import Dispersion
 from NormDispersion import NormDispersion
+from Coupling import Coupling
 from _append import set_append

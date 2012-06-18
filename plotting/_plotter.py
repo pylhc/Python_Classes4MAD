@@ -42,6 +42,8 @@ class plotter:
         if 'base' in self.macro:
             if not hasattr(self,'yfunc2'):
                 self.yfunc2=self.yfunc
+            if not hasattr(self,'errfunc2'):
+                self.errfunc2=self.errfunc
         mac=file(self.get_macro_file(),'r').read()
         script.write(mac % self)
         script.close()
@@ -94,13 +96,18 @@ class plotter:
         fpath=os.path.join(macros_path,'xtics_b'+str(self.beam)+'.gp')
         return file(fpath,'r').read()
 
-    def _set_datasets(self,free_1,free_2,base,base2=None):
+    def _set_datasets(self,free_1,free_2,base,base2=None,addXY=True):
         if not base2:
             base2=base
-        self.data1_p1=base+'x'
-        self.data2_p1=base+'x'
-        self.data1_p2=base2+'y'
-        self.data2_p2=base2+'y'
+        self.data1_p1=base
+        self.data2_p1=base
+        self.data1_p2=base2
+        self.data2_p2=base2
+        if addXY:
+            self.data1_p1+='x'
+            self.data2_p1+='x'
+            self.data1_p2+='y'
+            self.data2_p2+='y'
         if free_1:
             self.data1_p1+='_free'
             self.data1_p2+='_free'
