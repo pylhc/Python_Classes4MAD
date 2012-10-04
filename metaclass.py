@@ -42,6 +42,8 @@ class twiss:
             f=open(filename, 'r')
             
         for line in f:
+            if line.strip()[0]=="#": # comment line
+                continue
 #            if ("@ " in line and "%le" in line) :      # FIX to take DPP %s
             if ("@ " not in line and "@" in line): 
               line = replace(line, "@" , "@ ")
