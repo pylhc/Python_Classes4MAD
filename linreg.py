@@ -22,7 +22,10 @@ def linreg(X, Y):
     for x, y in map(None, X, Y):
         meanerror = meanerror + (y - Sy/N)**2
         residual = residual + (y - a * x - b)**2
-    RR = 1 - residual/meanerror
+    if residual == 0 and meanerror == 0:
+        RR = 1.0
+    else:
+        RR = 1 - residual/meanerror
     if N>2:
         ss = residual / (N-2)
     else:
