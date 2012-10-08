@@ -25,7 +25,6 @@ Function to read tfs tables into Python objects
 '''
 import numpy
 import os
-from string import lower
 
 
 class LookupDict:
@@ -51,7 +50,7 @@ class LookupDict:
         ukey = self._unify_key(key)
 
         if (self._values.has_key(ukey)):
-            return self._values[key]
+            return self._values[ukey]
         else:
             raise(error)
 
@@ -71,7 +70,7 @@ class LookupDict:
         return self._get_val_or_raise_error(key, KeyError())
 
     def _unify_key(self, key):
-        return lower(key)
+        return key.lower()
 
     def keys(self):
         '''
@@ -131,7 +130,10 @@ def tfsDict(inputfile):
             inputfile+='.TFS'
         else:
             raise ValueError("ERROR: "+inputfile+" is not a valid file path")
-    f=file(inputfile,'r')
+    if '.gz' in inputfile:
+        f=gzip.open(inputfile,'rb')
+    else:
+        f=open(inputfile,'r')
     l=f.readline()
     while(l):
         if l.strip()[0]=='@':
