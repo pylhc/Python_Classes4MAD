@@ -76,7 +76,7 @@ class twiss:
 
                 
 
-            if ("@" not in line and "*" not in line and "$" not in line) :
+            if ("@" not in line and "*" not in line and "$" not in line and "#" not in line) :
                 values=split(line)
                 for j in range(0,len(values)):
                     if ("%hd" in alltypes[j+1]):                      
@@ -157,7 +157,28 @@ class twiss:
             self.f4000.append(dumm)
             dumm=-sum(self.K1L*self.BETX**1*e**(2*complex(0,1)*2*pi*phix))/32.
             self.f2000.append(dumm)
-            
+        
+        self.f3000=array(self.f3000)
+        self.f2100=array(self.f2100)
+        self.f1020=array(self.f1020)
+        self.f1002=array(self.f1002)
+        self.f1011=array(self.f1011)
+        
+        self.f0120=self.f1002.conj()
+        self.f0111=self.f1011.conj()
+        self.f1200=self.f2100.conj()
+        
+        # ftermsRealSignal, email from Andrea Franchi:
+        #F_{NS3}=3f_{3000}-f_{1200}^*       H(-2, 0)
+        #F_{NS2}= f_{1020}-f_{0120}         H( 0,-2)
+        #F_{NS1}=2f_{1020}-f_{0111}^*       V(-1,-1)
+        #F_{NS0}=2f_{0120}-f_{0111}         V( 1,-1)
+        
+        self.fRS3=3*self.f3000-self.f2100
+        self.fRS2=  self.f1020-self.f0120
+        self.fRS1=2*self.f1020-self.f1011
+        self.fRS1=2*self.f0120-self.f0111
+    
     def chiterms(self, ListOfBPMS=[]):
         '''
          Add chi terms to the twiss table
@@ -316,18 +337,38 @@ class twiss:
                 
 
     def AveBetas(self):
+            totx=0
+            toty=0
+            totl=0
             for i in range(len(self.S)):
+              
                 if self.L[i]>0:
                     k=sqrt(abs(self.K1L[i])/self.L[i])
                     kL=k*self.L[i]
-                    
-                    if self.K1L[i] >= 0.0:
+                    if self.K1L[i]==0:
+                        bxs=self.BETX[i]*self.L[i]+self.ALFX[i]*self.L[i]**2+(1+self.ALFX[i]**2)/self.BETX[i]*self.L[i]**3/3.
+                        bys=self.BETY[i]*self.L[i]+self.ALFY[i]*self.L[i]**2+(1+self.ALFY[i]**2)/self.BETY[i]*self.L[i]**3/3.
+                        totx=totx+bxs
+                        toty=toty+bys
+                        totl=totl+self.L[i]
+                        print self.NAME[i],self.S[i], self.L[i], bxs,bys
+                    if self.K1L[i] > 0.0:
+                            bxs=self.ab(self.BETX[i],self.ALFX[i], kL, k)*self.L[i]
+                            totx=totx+bxs
+                            bys=self.abh(self.BETY[i],self.ALFY[i], kL, k)*self.L[i]
+                            toty=toty+bys
+                            totl=totl+self.L[i]
                             print self.NAME[i],self.S[i], self.L[i], self.ab(self.BETX[i],self.ALFX[i], kL, k), self.abh(self.BETY[i],self.ALFY[i], kL, k)
                     if self.K1L[i] < 0:
+                            bxs=self.abh(self.BETX[i],self.ALFX[i], kL, k)*self.L[i]
+                            totx=totx+bxs
+                            bys=self.ab(self.BETY[i],self.ALFY[i], kL, k)*self.L[i]
+                            toty=toty+bys
+                            totl=totl+self.L[i]
                             print self.NAME[i],self.S[i], self.L[i], self.abh(self.BETX[i],self.ALFX[i], kL, k), self.ab(self.BETY[i],self.ALFY[i], kL, k)
                 else:
                     print self.NAME[i],self.S[i], self.L[i], self.BETX[i], self.BETY[i]
-
+            print "TOTAL", self.S[i],totl,totx,toty
 
     def I5(self):
         H=0
