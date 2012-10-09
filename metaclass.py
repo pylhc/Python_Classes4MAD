@@ -149,7 +149,7 @@ class twiss:
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix+2*phiy)))/8.
             self.f1020.append(dumm/(1.+e**(I*2*pi*(self.Q1+2*self.Q2))))
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix-2*phiy)))/8.
-            self.f1002.append(dumm/(1.+e**(I*2*pi*(self.Q1-2*self.Q2)))
+            self.f1002.append(dumm/(1.+e**(I*2*pi*(self.Q1-2*self.Q2))))
             dumm=sum((self.K1L-2*self.K2L*self.DX)*self.BETX*e**(2*I*2*pi*phix))/8.
             self.f20001.append(dumm/(1.+e**(2*I*2*pi*self.Q1)))
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix)))/4.
