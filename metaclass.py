@@ -65,7 +65,7 @@ class twiss:
 
             if ("* " in line or "*\t" in line) :
                 alllabels=split(line)
-                print "alllabels",len(alllabels)
+                #print "alllabels",len(alllabels)
                 for j in range(1,len(alllabels)):
                     exec "self."+alllabels[j]+"= []"
                     self.keys.append(alllabels[j])
@@ -142,22 +142,23 @@ class twiss:
             for j in range(0,i):
                 phix[j] += self.Q1
                 phiy[j] += self.Q2
-            dumm=-sum(self.K2L*self.BETX**1.5*e**(3*I*2*pi*phix))/24.
-            self.f3000.append(dumm/(1.+e**(3*I*2*pi*self.Q1)))
-            dumm=-sum(self.K2L*self.BETX**1.5*e**(I*2*pi*phix))/8.
-            self.f2100.append(dumm/(1.+e**(I*2*pi*self.Q1)))
+            #print phix
+            dumm=-sum(self.K2L*self.BETX**1.5*e**(3*I*2*pi*phix))/48.
+            self.f3000.append(dumm/(1.-e**(3*I*2*pi*self.Q1)))
+            dumm=-sum(self.K2L*self.BETX**1.5*e**(I*2*pi*phix))/16.
+            self.f2100.append(dumm/(1.-e**(I*2*pi*self.Q1)))
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix+2*phiy)))/8.
-            self.f1020.append(dumm/(1.+e**(I*2*pi*(self.Q1+2*self.Q2))))
+            self.f1020.append(dumm/(1.-e**(I*2*pi*(self.Q1+2*self.Q2))))
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix-2*phiy)))/8.
-            self.f1002.append(dumm/(1.+e**(I*2*pi*(self.Q1-2*self.Q2))))
+            self.f1002.append(dumm/(1.-e**(I*2*pi*(self.Q1-2*self.Q2))))
             dumm=sum((self.K1L-2*self.K2L*self.DX)*self.BETX*e**(2*I*2*pi*phix))/8.
-            self.f20001.append(dumm/(1.+e**(2*I*2*pi*self.Q1)))
+            self.f20001.append(dumm/(1.-e**(2*I*2*pi*self.Q1)))
             dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix)))/4.
-            self.f1011.append(dumm/(1.+e**(I*2*pi*self.Q1)))
+            self.f1011.append(dumm/(1.-e**(I*2*pi*self.Q1)))
             dumm=-sum(self.K3L*self.BETX**2*e**(4*I*2*pi*(phix)))/384.
-            self.f4000.append(dumm/(1.+e**(4*I*2*pi*self.Q1)))
+            self.f4000.append(dumm/(1.-e**(4*I*2*pi*self.Q1)))
             dumm=-sum(self.K1L*self.BETX**1*e**(2*I*2*pi*phix))/32.
-            self.f2000.append(dumm/(1.+e**(2*I*2*pi*self.Q1)))
+            self.f2000.append(dumm/(1.-e**(2*I*2*pi*self.Q1)))
         
         self.f3000=array(self.f3000)
         self.f2100=array(self.f2100)
