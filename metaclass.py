@@ -1,268 +1,323 @@
-#!/usr/bin/env python
+# version 1 unknown/unknown
+# version 2 20120905 (tbach):
+# - major refactoring
+# - cleared indentation
+# - moved help section in comments to top and docstring
+# - removed all exec statements (replaced with setattr) (still not good)
+# - added class attributes for all unknown members
+# - declared constants for PI, E, I
+# - cleaned up imports
+# - removed all trailing ";"
+# - tested it for getllm/lhc, produces exactly same results
+# (getllm called only Cmatrix and chiterms functions))
+# 
+
+"""
+Read the twiss class from the twiss file
+x=twiss('twiss')
+use it as:
+print x.Q1, x.Q2, x.BETX[0]
 
 
-#try:
-#    from Numeric import *
-#    from LinearAlgebra import *
-#except:
-from numpy import *
+run beaMatrix for example:
+x.beatMatrix()
+print x.RM[0]
+
+
+BETA-BEAT CORRECTION
+first compute the response matrix by:
+x.beatMatrix()
+Define targetbeat as an array containing the desired changed in Dbeta/beta (x,y)
+targetbeat=Dbeta/beta
+dkl gives the required integrated strengths by:
+dkl=matrixmultiply(generalized_inverse(x.RM,0.003),targetbeat)
+
+
+Want to explore the singular values?:
+svd=singular_value_decomposition(x.RM)
+
+
+Computing SEXTUPOLAR RESONANCE TERMS:
+x.fterms()
+The fterms are arrays evaluated at all the elements:
+print x.f3000 , x.f2100  , x.f1020, x.f1002
+
+
+COUPLING
+Compute the Cmatrix, gamma, f1001 and f1010 from the Twiss file at all elements
+x.Cmatrix()
+print x.C[0]   (four components of C at the first elements)
+print x.f1001
+...
+"""
+
+import numpy
 from numpy import dot as matrixmultiply
-#from numpy.linalg import inv as generalized_inverse
 from numpy.linalg import inv as inverse
 from numpy.linalg import det as determinant
 
 
-from string import split
-from string import replace
 import sys
-import gzip
 
+I = complex(0, 1)
+E = numpy.e
+PI = numpy.pi
 
-#########################
 class twiss:
-#########################
-    "Twiss parameters from madx output (with free choice of select items)"
+    """Twiss parameters from madx output (with free choice of select items)"""
 
     def forknames(self, dictionary):
+        NAME = getattr(self, "NAME")
         for n in dictionary:
-            if n in self.NAME:
-                for m in  dictionary[n]:
-                    self.indx[m]=self.indx[n]
-                    self.indx[m.upper()]=self.indx[n]
+            if n in NAME:
+                for m in dictionary[n]:
+                    self.indx[m] = self.indx[n]
+                    self.indx[m.upper()] = self.indx[n]
             else:
-                print n, "from dictionary not in NAME; ",n," skiped "
-                
-    def __init__(self, filename, dictionary={}): 
-        self.indx={}
-        self.keys=[]
-        alllabels=[]
-        if '.gz' in filename:
-            f=gzip.open(filename, 'rb')
+                print "skipped value from dictionary because not in NAME. value: ", n
+
+    def __init__(self, filename, dictionary=None):
+        if dictionary is None:
+            dictionary = {}
+        self.indx = {}
+        self.keys = []
+        alllabels = []
+
+        if filename.endswith(".gz"):
+            import gzip
+            f = gzip.open(filename, 'rb')
         else:
-            f=open(filename, 'r')
-            
+            f = open(filename, 'r')
         for line in f:
             if line.startswith("#"): # comment line
                 continue
-#            if ("@ " in line and "%le" in line) :      # FIX to take DPP %s
-            if ("@ " not in line and "@" in line): 
-              line = replace(line, "@" , "@ ")
-            if ("@ " in line and "%" in line and "s" not in split(line)[2]) :
-                label=split(line)[1]
+            
+            if ("@ " not in line and "@" in line):
+                line = line.replace("@" , "@ ")
+            split_line = line.split()
+            
+            if ("@ " in line and "%" in line and "s" not in split_line[2]):
+                label = split_line[1]
                 try:
-                        exec "self."+label+"= "+str(float(split(replace(line, '"', ''))[3]))
+                    setattr(self, label, float(split_line[3].replace("\"", "")))
                 except:
-                        print "Problem parsing:", line
-                        print "Going to be parsed as string"
-                        try:
-                            exec "self."+label+"= \""+replace(split(line)[3], '"', '')+"\""
-                        except:
-                            print "Problem persits, let's ignore it!"
-            elif ("@ " in line and "s"  in split(line)[2]):
-                label=split(line)[1].replace(":","")
-                exec "self."+label+"= \""+split(replace(line, '"', ''))[3]+"\""
+                    print "Problem parsing:", line, 
+                    print "Going to be parsed as string"
+                    try:
+                        setattr(self, label, split_line[3].replace("\"", ""))
+                    except:
+                        print "Problem persists, let's ignore it!"
+            elif ("@ " in line and "s" in split_line[2]):
+                label = split_line[1].replace(":", "")
+                setattr(self, label, split_line[3].replace("\"", ""))
 
+            if ("* " in line or "*\t" in line):
+                alllabels = split_line
+                for alllabels_item in alllabels[1:]:
+                    setattr(self, alllabels_item, [])
+                    self.keys.append(alllabels_item)
 
-            if ("* " in line or "*\t" in line) :
-                alllabels=split(line)
-                #print "alllabels",len(alllabels)
-                for j in range(1,len(alllabels)):
-                    exec "self."+alllabels[j]+"= []"
-                    self.keys.append(alllabels[j])
-                            
-            if ("$ " in line or "$\t" in line) :
-                alltypes=split(line)
+            if ("$ " in line or "$\t" in line):
+                alltypes = split_line
 
-
-                
-
-            if ("@" not in line and "*" not in line and "$" not in line and "#" not in line) :
-                values=split(line)
+            if ("@" not in line and "*" not in line and "$" not in line and "#" not in line):
+                values = split_line
                 for j in range(0,len(values)):
-                    if ("%hd" in alltypes[j+1]):                      
-                        exec "self."+alllabels[j+1]+".append("+str(int(values[j]))+")"
-                    
-                    if ("%le" in alltypes[j+1]):                      
-                        exec "self."+alllabels[j+1]+".append("+str(float(values[j]))+")"
+                    if ("%hd" in alltypes[j + 1]):
+                        getattr(self, alllabels[j + 1]).append(int(values[j]))
+                    if ("%le" in alltypes[j + 1]):
+                        getattr(self, alllabels[j + 1]).append(float(values[j]))
                     if ("s" in alltypes[j+1]):
-                      try:
-                          exec "self."+alllabels[j+1]+".append("+values[j]+")"
-                      except:
-                          exec "self."+alllabels[j+1]+".append(\""+values[j]+"\")" #To allow with or without ""
-                      if "NAME"==alllabels[j+1]:
-                          self.indx[replace(values[j], '"', '')]=len(self.NAME)-1
-                          self.indx[replace(values[j], '"', '').upper()]=len(self.NAME)-1
-                          self.indx[replace(values[j], '"', '').lower()]=len(self.NAME)-1
+                        getattr(self, alllabels[j + 1]).append(values[j].replace("\"", ""))
+                        if "NAME" == alllabels[j + 1]:
+                            NAME = getattr(self, "NAME")
+                            self.indx[values[j].replace("\"", "")] = len(NAME) - 1
+                            self.indx[values[j].replace("\"", "").upper()] = len(NAME) - 1
+                            self.indx[values[j].replace("\"", "").lower()] = len(NAME) - 1
 
         f.close()
         try:
-            alllabels
             alltypes
         except:
-            print "From Metaclass: Bad format or empy file ", filename
+            print "From Metaclass: Bad format or empty file ", filename
             print "Leaving Metaclass"
-            exit()
+            exit(1)
 
-        
-        for j in range(1,len(alllabels)):
-            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])  ):  
-                exec "self."+alllabels[j]+"= array(self."+alllabels[j]+")"           
+
+        for j in range(1, len(alllabels)):
+            if (("%le" in alltypes[j]) | ("%hd" in alltypes[j])):
+                setattr(self, alllabels[j], numpy.array(getattr(self, alllabels[j])))
 
         if len(dictionary) > 0:
             self.forknames(dictionary)
 
     def chrombeat(self):
-      '''
-       Add dbx/dby to the twiss table
-      '''
-      self.dbx=[]
-      self.dby=[]
-      for i in range(0,len(self.S)): 
-        ax=self.WX[i]*cos(self.PHIX[i]*2*pi)
-        ay=self.WY[i]*cos(self.PHIY[i]*2*pi)
-        self.dbx.append(ax)
-        self.dby.append(ay)
-        
+        '''
+         Add dbx/dby to the twiss table
+        '''
+        self.dbx = []
+        self.dby = []
+        S = getattr(self, "S")
+        WX = getattr(self, "WX")
+        WY = getattr(self, "WY")
+        PHIX = getattr(self, "PHIX")
+        PHIY = getattr(self, "PHIY")
+        for i in range(0, len(S)):
+            ax = WX[i] * numpy.cos(PHIX[i] * 2 * PI)
+            ay = WY[i] * numpy.cos(PHIY[i] * 2 * PI)
+            self.dbx.append(ax)
+            self.dby.append(ay)
+
     def fterms(self):
         '''
          Add f terms to the twiss table
         '''
-        self.f3000= []
-        self.f2100= []
-        self.f1020= []
-        self.f1002= []
-        self.f20001= []
-        self.f1011= []
-        self.f4000=[]
-        self.f2000=[]
-        I=complex(0,1)
-        for i in range(0,len(self.S)):
-            phix = self.MUX-self.MUX[i]
-            phiy = self.MUY-self.MUY[i]
-            for j in range(0,i):
-                phix[j] += self.Q1
-                phiy[j] += self.Q2
-            #print phix
-            dumm=-sum(self.K2L*self.BETX**1.5*e**(3*I*2*pi*phix))/48.
-            self.f3000.append(dumm/(1.-e**(3*I*2*pi*self.Q1)))
-            dumm=-sum(self.K2L*self.BETX**1.5*e**(I*2*pi*phix))/16.
-            self.f2100.append(dumm/(1.-e**(I*2*pi*self.Q1)))
-            dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix+2*phiy)))/8.
-            self.f1020.append(dumm/(1.-e**(I*2*pi*(self.Q1+2*self.Q2))))
-            dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix-2*phiy)))/8.
-            self.f1002.append(dumm/(1.-e**(I*2*pi*(self.Q1-2*self.Q2))))
-            dumm=sum((self.K1L-2*self.K2L*self.DX)*self.BETX*e**(2*I*2*pi*phix))/8.
-            self.f20001.append(dumm/(1.-e**(2*I*2*pi*self.Q1)))
-            dumm=sum(self.K2L*self.BETX**0.5*self.BETY*e**(I*2*pi*(phix)))/4.
-            self.f1011.append(dumm/(1.-e**(I*2*pi*self.Q1)))
-            dumm=-sum(self.K3L*self.BETX**2*e**(4*I*2*pi*(phix)))/384.
-            self.f4000.append(dumm/(1.-e**(4*I*2*pi*self.Q1)))
-            dumm=-sum(self.K1L*self.BETX**1*e**(2*I*2*pi*phix))/32.
-            self.f2000.append(dumm/(1.-e**(2*I*2*pi*self.Q1)))
-        
-        self.f3000=array(self.f3000)
-        self.f2100=array(self.f2100)
-        self.f1020=array(self.f1020)
-        self.f1002=array(self.f1002)
-        self.f1011=array(self.f1011)
-        
-        self.f0120=self.f1002.conj()
-        self.f0111=self.f1011.conj()
-        self.f1200=self.f2100.conj()
-        
-        # ftermsRealSignal, email from Andrea Franchi:
-        #F_{NS3}=3f_{3000}-f_{1200}^*       H(-2, 0)
-        #F_{NS2}= f_{1020}-f_{0120}         H( 0,-2)
-        #F_{NS1}=2f_{1020}-f_{0111}^*       V(-1,-1)
-        #F_{NS0}=2f_{0120}-f_{0111}         V( 1,-1)
-        
-        self.fRS3=3*self.f3000-self.f2100
-        self.fRS2=  self.f1020-self.f0120
-        self.fRS1=2*self.f1020-self.f1011
-        self.fRS1=2*self.f0120-self.f0111
-    
-    def chiterms(self, ListOfBPMS=[]):
+        self.f3000 = []
+        self.f2100 = []
+        self.f1020 = []
+        self.f1002 = []
+        self.f20001 = []
+        self.f1011 = []
+        self.f4000 = []
+        self.f2000 = []
+        S = getattr(self, "S")
+        MUX = getattr(self, "MUX")
+        MUY = getattr(self, "MUY")
+        Q1 = getattr(self, "Q1")
+        Q2 = getattr(self, "Q2")
+        K1L = getattr(self, "K1L")
+        K2L = getattr(self, "K2L")
+        K3L = getattr(self, "K3L")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        DX = getattr(self, "DX")
+        for i in range(0, len(S)):
+            phix = MUX - MUX[i]
+            phiy = MUY - MUY[i]
+            for j in range(0, i):
+                phix[j] += Q1
+                phiy[j] += Q2
+            dumm = -sum(K2L * BETX ** 1.5 * E ** (3 * I * 2 * PI * phix)) / 48.
+            self.f3000.append(dumm / (1. - E ** (3 * I * 2 * PI * Q1)))
+            dumm = -sum(K2L * BETX ** 1.5 * E ** (I * 2 * PI * phix)) / 16.
+            self.f2100.append(dumm / (1. - E ** (I * 2 * PI * Q1)))
+            dumm = sum(K2L * BETX ** 0.5 * BETY * E ** (I * 2 * PI * (phix + 2 * phiy))) / 8.
+            self.f1020.append(dumm / (1. - E ** (I * 2 * PI * (Q1 + 2 * Q2))))
+            dumm = sum(K2L * BETX ** 0.5 * BETY * E ** (I * 2 * PI * (phix - 2 * phiy))) / 8.
+            self.f1002.append(dumm / (1. - E ** (I * 2 * PI * (Q1 - 2 * Q2))))
+            dumm = sum((K1L - 2 * K2L * DX) * BETX * E ** (2 * I * 2 * PI * phix)) / 8.
+            self.f20001.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
+            dumm = sum(K2L * BETX ** 0.5 * BETY * E ** (I * 2 * PI * (phix))) / 4.
+            self.f1011.append(dumm / (1. - E ** (I * 2 * PI * Q1)))
+            dumm = -sum(K3L * BETX ** 2 * E ** (4 * I * 2 * PI * (phix))) / 384.
+            self.f4000.append(dumm / (1. - E ** (4 * I * 2 * PI * Q1)))
+            dumm = -sum(K1L * BETX ** 1 * E ** (2 * I * 2 * PI * phix)) / 32.
+            self.f2000.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
+
+        self.f3000 = numpy.array(self.f3000)
+        self.f2100 = numpy.array(self.f2100)
+        self.f1020 = numpy.array(self.f1020)
+        self.f1002 = numpy.array(self.f1002)
+        self.f1011 = numpy.array(self.f1011)
+
+        self.f0120 = numpy.conjugate(self.f1002)
+        self.f0111 = numpy.conjugate(self.f1011)
+        self.f1200 = numpy.conjugate(self.f2100)
+
+        self.fRS3 = 3 * self.f3000 - self.f2100
+        self.fRS2 = self.f1020 - self.f0120
+        self.fRS1 = 2 * self.f1020 - self.f1011
+        self.fRS1 = 2 * self.f0120 - self.f0111
+
+    def chiterms(self, ListOfBPMS=None):
         '''
          Add chi terms to the twiss table
         '''
-        factMADtoSix=0.0005
-        self.chi3000=[]
-        self.chi4000=[]
-        self.chi2000=[]
-        if len(ListOfBPMS)==0:
+        if ListOfBPMS is None:
+            ListOfBPMS = []
+        
+        factMADtoSix = 0.0005
+        self.chi3000 = []
+        self.chi4000 = []
+        self.chi2000 = []
+        NAME = getattr(self, "NAME")
+        S = getattr(self, "S")
+        MUX = getattr(self, "MUX")
+        K1L = getattr(self, "K1L")
+        K2L = getattr(self, "K2L")
+        K3L = getattr(self, "K3L")
+        BETX = getattr(self, "BETX")
+        
+        if len(ListOfBPMS) == 0:
             print "Assuming that BPM elements are named as BP and H"
-            for el in self.NAME:
+            for el in NAME:
                 if "BP" in el and "H" in el:
                     ListOfBPMS.append(el)
-                    
+
         print "Found ", len(ListOfBPMS), "BPMs for chiterms computation"
-        if len(ListOfBPMS)<3:
+        if len(ListOfBPMS) < 3:
             print "Error, not enough H BPMs in ListOfBPMs"
-            sys.exit()
-        
-        self.chi=[]
-        self.chiBPMs=[]
-        self.chiS=[]
-        for i in range(len(ListOfBPMS)-2):
-            name=ListOfBPMS[i]
-            name1=ListOfBPMS[i+1]
-            name2=ListOfBPMS[i+2]
-            self.chiBPMs.append([name,name1,name2])
-            indx=self.indx[name]
-            indx1=self.indx[name1]
-            indx2=self.indx[name2]
-            bphmii=self.MUX[indx]
-            bphmii1=self.MUX[indx1]
-            bphmii2=self.MUX[indx2]
-            bphs=self.S[indx]
-            bphs1=self.S[indx1]
-            bphs2=self.S[indx2]
-            self.chiS.append([bphs,bphs1,bphs2])
-            d1= (bphmii1- bphmii)*2*pi-pi/2;
-            d2= (bphmii2- bphmii1)*2*pi-pi/2;
-            f1= sqrt(1+(sin(d1)/cos(d1))**2);
-            f2= sqrt(1+(sin(d2)/cos(d2))**2);
-            quadr=0
-            quadi=0
-            sexr=0
-            sexi=0
-            octr=0
-            octi=0
-            for j in range(len(self.NAME)):
-                k1l=self.K1L[j]
-                k2l=self.K2L[j]
-                k3l=self.K3L[j]
-                bx=self.BETX[j]
-                m=self.MUX[j]
-                if self.S[j] > bphs and self.S[j] < bphs1 and k2l**2 > 0:
+            sys.exit(1)
 
-                    quadr+=cos(-1*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k1l*bx**1*f1;
-                    quadi+=sin(-1*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k1l*bx**1*f1;
-                    
-                    sexr += cos(-2*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k2l*bx**1.5*f1;
-                    sexi += sin(-2*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k2l*bx**1.5*f1;
+        self.chi = []
+        self.chiBPMs = []
+        self.chiS = []
+        for i in range(len(ListOfBPMS) - 2):
+            name = ListOfBPMS[i]
+            name1 = ListOfBPMS[i + 1]
+            name2 = ListOfBPMS[i + 2]
+            self.chiBPMs.append([name, name1, name2])
+            indx = self.indx[name]
+            indx1 = self.indx[name1]
+            indx2 = self.indx[name2]
+            bphmii = MUX[indx]
+            bphmii1 = MUX[indx1]
+            bphmii2 = MUX[indx2]
+            bphs = S[indx]
+            bphs1 = S[indx1]
+            bphs2 = S[indx2]
+            self.chiS.append([bphs, bphs1, bphs2])
+            d1 = (bphmii1 - bphmii) * 2 * PI - PI / 2
+            d2 = (bphmii2 - bphmii1) * 2 * PI - PI / 2
+            f1 = numpy.sqrt(1 + (numpy.sin(d1) / numpy.cos(d1)) ** 2)
+            f2 = numpy.sqrt(1 + (numpy.sin(d2) / numpy.cos(d2)) ** 2)
+            quadr = 0
+            quadi = 0
+            sexr = 0
+            sexi = 0
+            octr = 0
+            octi = 0
+            for j in range(len(NAME)):
+                k1l = K1L[j]
+                k2l = K2L[j]
+                k3l = K3L[j]
+                bx = BETX[j]
+                m = MUX[j]
+                if S[j] > bphs and S[j] < bphs1 and k2l ** 2 > 0:
+                    quadr += numpy.cos(-1 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k1l * bx ** 1 * f1
+                    quadi += numpy.sin(-1 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k1l * bx ** 1 * f1
 
-                    octr += cos(-3*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k3l*bx**2*f1;
-                    octi += sin(-3*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi)*k3l*bx**2*f1;
-                    
-                if self.S[j] > bphs1 and self.S[j] < bphs2 and k2l**2 > 0:
+                    sexr += numpy.cos(-2 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k2l * bx ** 1.5 * f1
+                    sexi += numpy.sin(-2 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k2l * bx ** 1.5 * f1
 
-                    quadr+=cos(-1*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k1l*bx**1*f2;
-                    quadi+=sin(-1*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k1l*bx**1*f2;
-                    
-                    sexr += cos(-2*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k2l*bx**1.5*f2;
-                    sexi += sin(-2*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k2l*bx**1.5*f2;
+                    octr += numpy.cos(-3 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k3l * bx ** 2 * f1
+                    octi += numpy.sin(-3 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI) * k3l * bx ** 2 * f1
 
-                    octr += cos(-3*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k3l*bx**2*f2;
-                    octi += sin(-3*(m-bphmii)*2*pi)*sin((m-bphmii)*2*pi-d1-d2)*k3l*bx**2*f2;
-                    
-                if self.S[j] > bphs2:
+                if S[j] > bphs1 and S[j] < bphs2 and k2l ** 2 > 0:
+                    quadr += numpy.cos(-1 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k1l * bx ** 1 * f2
+                    quadi += numpy.sin(-1 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k1l * bx ** 1 * f2
+
+                    sexr += numpy.cos(-2 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k2l * bx ** 1.5 * f2
+                    sexi += numpy.sin(-2 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k2l * bx ** 1.5 * f2
+
+                    octr += numpy.cos(-3 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k3l * bx ** 2 * f2
+                    octi += numpy.sin(-3 * (m - bphmii) * 2 * PI) * numpy.sin((m - bphmii) * 2 * PI - d1 - d2) * k3l * bx ** 2 * f2
+
+                if S[j] > bphs2:
                     break
-            self.chi.append(complex(sexr,sexi)/4*factMADtoSix)
-            self.chi4000.append(complex(octr,octi)/4*factMADtoSix)
-            self.chi2000.append(complex(quadr,quadi)/4*factMADtoSix)                
-        
-
+            self.chi.append(complex(sexr, sexi) / 4 * factMADtoSix)
+            self.chi4000.append(complex(octr, octi) / 4 * factMADtoSix)
+            self.chi2000.append(complex(quadr, quadi) / 4 * factMADtoSix)
 
     def Cmatrix(self):
         '''
@@ -272,149 +327,137 @@ class twiss:
         self.gamma = []
         self.f1001 = []
         self.f1010 = []
-        
-        J = reshape(array([0,1,-1,0]),(2,2))
-        for j in range(0,len(self.S)):
-            R = array([[self.R11[j],self.R12[j]],[self.R21[j],self.R22[j]]])
-            #print R
-            C = matrixmultiply(-J,matrixmultiply(transpose(R),J))
-            C = (1/sqrt(1+determinant(R)))*C
+        S = getattr(self, "S")
+        R11 = getattr(self, "R11")
+        R12 = getattr(self, "R12")
+        R21 = getattr(self, "R21")
+        R22 = getattr(self, "R22")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        ALFX = getattr(self, "ALFX")
+        ALFY = getattr(self, "ALFY")
 
-            g11 = 1/sqrt(self.BETX[j])
-            g12 = 0
-            g21 = self.ALFX[j]/sqrt(self.BETX[j])
-            g22 = sqrt(self.BETX[j])
-            Ga = reshape(array([g11,g12,g21,g22]),(2,2))
+        J = numpy.reshape(numpy.array([0, 1, -1, 0]), (2, 2))
+        for j in range(0, len(S)):
+            R = numpy.array([[R11[j], R12[j]], [R21[j], R22[j]]])
+            
+            C = matrixmultiply(-J, matrixmultiply(numpy.transpose(R), J))
+            C = (1 / numpy.sqrt(1 + determinant(R))) * C
 
-            g11 = 1/sqrt(self.BETY[j])
+            g11 = 1 / numpy.sqrt(BETX[j])
             g12 = 0
-            g21 = self.ALFY[j]/sqrt(self.BETY[j])
-            g22 = sqrt(self.BETY[j])
-            Gb = reshape(array([g11,g12,g21,g22]),(2,2))
+            g21 = ALFX[j] / numpy.sqrt(BETX[j])
+            g22 = numpy.sqrt(BETX[j])
+            Ga = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
+
+            g11 = 1 / numpy.sqrt(BETY[j])
+            g12 = 0
+            g21 = ALFY[j] / numpy.sqrt(BETY[j])
+            g22 = numpy.sqrt(BETY[j])
+            Gb = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
             C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
-            gamma=1-determinant(C)
+            gamma = 1 - determinant(C)
             self.gamma.append(gamma)
-            C = ravel(C)
+            C = numpy.ravel(C)
             self.C.append(C)
-            self.f1001.append(((C[0]+C[3])*1j + (C[1]-C[2]))/4/gamma)
-            self.f1010.append(((C[0]-C[3])*1j +(-C[1]-C[2]))/4/gamma)
+            self.f1001.append(((C[0] + C[3]) * 1j + (C[1] - C[2])) / 4 / gamma)
+            self.f1010.append(((C[0] - C[3]) * 1j + (-C[1] - C[2])) / 4 / gamma)
 
-        self.F1001R=array(self.f1001).real
-        self.F1001I=array(self.f1001).imag
-        self.F1010R=array(self.f1010).real
-        self.F1010I=array(self.f1010).imag
-        self.F1001W=sqrt(self.F1001R**2+self.F1001I**2)
-        self.F1010W=sqrt(self.F1010R**2+self.F1010I**2)
-        
+        self.F1001R = numpy.array(self.f1001).real
+        self.F1001I = numpy.array(self.f1001).imag
+        self.F1010R = numpy.array(self.f1010).real
+        self.F1010I = numpy.array(self.f1010).imag
+        self.F1001W = numpy.sqrt(self.F1001R ** 2 + self.F1001I ** 2)
+        self.F1010W = numpy.sqrt(self.F1010R ** 2 + self.F1010I ** 2)
+
     def beatMatrix(self):
         '''
          Add RM to the twiss table
         '''
         self.RM = []
-        for j in range(0,len(self.S)):
-            self.RM.append(-self.BETX*cos(2*pi*(self.Q1-2*abs(self.MUX[j]-self.MUX)))/sin(2*pi*self.Q1))
-        for j in range(0,len(self.S)):
-            self.RM.append(-self.BETY*cos(2*pi*(self.Q2-2*abs(self.MUY[j]-self.MUY)))/sin(2*pi*self.Q2))
-        self.RM=array(self.RM)
+        S = getattr(self, "S")
+        MUX = getattr(self, "MUX")
+        MUY = getattr(self, "MUY")
+        Q1 = getattr(self, "Q1")
+        Q2 = getattr(self, "Q2")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        
+        for j in range(0, len(S)):
+            self.RM.append(-BETX * numpy.cos(2 * PI * (Q1 - 2 * abs(MUX[j] - MUX))) / numpy.sin(2 * PI * Q1))
+        for j in range(0, len(S)):
+            self.RM.append(-BETY * numpy.cos(2 * PI * (Q2 - 2 * abs(MUY[j] - MUY))) / numpy.sin(2 * PI * Q2))
+        self.RM = numpy. array(self.RM)
 
+    def abh(self, bet1, alf1, KL, K):
+        """ bet1 and alf1 at the end of the element """
+        gamma1 = (1. + alf1 ** 2) / bet1
+        KL2 = 2.*KL
+        sinhc = numpy.sinh(KL2) / KL2
+        res = 0.5 * bet1 * (1. + sinhc) + alf1 * numpy.sinh(KL) ** 2. / KL / K + (sinhc - 1.) / (2.*K ** 2.) * gamma1
+        return res
 
-    def abh(self,bet1,alf1,KL,K):
-            """ bet1 and alf1 at the end of the element """
-            gamma1=(1.+alf1**2)/bet1
-            KL2=2.*KL
-            sinhc=sinh(KL2)/KL2
-            res=0.5*bet1*(1.+sinhc)+alf1*sinh(KL)**2./KL/K+(sinhc-1.)/(2.*K**2.)*gamma1
-            return res
-
-
-    def ab(self,bet1,alf1,KL,K):
-            """ bet1 and alf1 at the end of the element """
-            gamma1=(1.+alf1**2)/bet1
-            KL2=2.*KL
-            sinc=sin(KL2)/KL2
-            res=0.5*bet1*(1.+sinc)+alf1*sin(KL)**2./KL/K+(1.-sinc)/(2.*K**2.)*gamma1
-            return res
-            
-                
-                
+    def ab(self, bet1, alf1, KL, K):
+        """ bet1 and alf1 at the end of the element """
+        gamma1 = (1. + alf1 ** 2) / bet1
+        KL2 = 2.*KL
+        sinc = numpy.sin(KL2) / KL2
+        res = 0.5 * bet1 * (1. + sinc) + alf1 * numpy.sin(KL) ** 2. / KL / K + (1. - sinc) / (2.*K ** 2.) * gamma1
+        return res
 
     def AveBetas(self):
-            totx=0
-            toty=0
-            totl=0
-            for i in range(len(self.S)):
-              
-                if self.L[i]>0:
-                    k=sqrt(abs(self.K1L[i])/self.L[i])
-                    kL=k*self.L[i]
-                    if self.K1L[i]==0:
-                        bxs=self.BETX[i]*self.L[i]+self.ALFX[i]*self.L[i]**2+(1+self.ALFX[i]**2)/self.BETX[i]*self.L[i]**3/3.
-                        bys=self.BETY[i]*self.L[i]+self.ALFY[i]*self.L[i]**2+(1+self.ALFY[i]**2)/self.BETY[i]*self.L[i]**3/3.
-                        totx=totx+bxs
-                        toty=toty+bys
-                        totl=totl+self.L[i]
-                        print self.NAME[i],self.S[i], self.L[i], bxs,bys
-                    if self.K1L[i] > 0.0:
-                            bxs=self.ab(self.BETX[i],self.ALFX[i], kL, k)*self.L[i]
-                            totx=totx+bxs
-                            bys=self.abh(self.BETY[i],self.ALFY[i], kL, k)*self.L[i]
-                            toty=toty+bys
-                            totl=totl+self.L[i]
-                            print self.NAME[i],self.S[i], self.L[i], self.ab(self.BETX[i],self.ALFX[i], kL, k), self.abh(self.BETY[i],self.ALFY[i], kL, k)
-                    if self.K1L[i] < 0:
-                            bxs=self.abh(self.BETX[i],self.ALFX[i], kL, k)*self.L[i]
-                            totx=totx+bxs
-                            bys=self.ab(self.BETY[i],self.ALFY[i], kL, k)*self.L[i]
-                            toty=toty+bys
-                            totl=totl+self.L[i]
-                            print self.NAME[i],self.S[i], self.L[i], self.abh(self.BETX[i],self.ALFX[i], kL, k), self.ab(self.BETY[i],self.ALFY[i], kL, k)
-                else:
-                    print self.NAME[i],self.S[i], self.L[i], self.BETX[i], self.BETY[i]
-            print "TOTAL", self.S[i],totl,totx,toty
+        totx = 0
+        toty = 0
+        totl = 0
+        S = getattr(self, "S")
+        L = getattr(self, "L")
+        K1L = getattr(self, "K1L")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        ALFX = getattr(self, "ALFX")
+        ALFY = getattr(self, "ALFY")
+        NAME = getattr(self, "NAME")
+        
+        for i in range(len(S)):
+            if L[i] > 0:
+                k = numpy.sqrt(abs(K1L[i]) / L[i])
+                kL = k * L[i]
+                if K1L[i] == 0:
+                    bxs = BETX[i] * L[i] + ALFX[i] * L[i] ** 2 + (1 + ALFX[i] ** 2) / BETX[i] * L[i] ** 3 / 3.
+                    bys = BETY[i] * L[i] + ALFY[i] * L[i] ** 2 + (1 + ALFY[i] ** 2) / BETY[i] * L[i] ** 3 / 3.
+                    totx = totx + bxs
+                    toty = toty + bys
+                    totl = totl + L[i]
+                    print NAME[i], S[i], L[i], bxs, bys
+                if K1L[i] > 0.0:
+                    bxs = self.ab(BETX[i], ALFX[i], kL, k) * L[i]
+                    totx = totx + bxs
+                    bys = self.abh(BETY[i], ALFY[i], kL, k) * L[i]
+                    toty = toty + bys
+                    totl = totl + L[i]
+                    print NAME[i], S[i], L[i], self.ab(BETX[i], ALFX[i], kL, k), self.abh(BETY[i], ALFY[i], kL, k)
+                if K1L[i] < 0:
+                    bxs = self.abh(BETX[i], ALFX[i], kL, k) * L[i]
+                    totx = totx + bxs
+                    bys = self.ab(BETY[i], ALFY[i], kL, k) * L[i]
+                    toty = toty + bys
+                    totl = totl + L[i]
+                    print NAME[i], S[i], L[i], self.abh(BETX[i], ALFX[i], kL, k), self.ab(BETY[i], ALFY[i], kL, k)
+            else:
+                print NAME[i], S[i], L[i], BETX[i], BETY[i]
+            print "TOTAL", S[i], totl, totx, toty
 
     def I5(self):
-        H=0
-        for i in range(len(self.NAME)):
-           H=H+ (self.DX[i]**2+(self.DPX[i]*self.BETX[i]+self.DX[i]*self.ALFX[i])**2)/self.BETX[i]* (abs(self.ANGLE[i]))**3/self.L[i]**2
+        H = 0
+        NAME = getattr(self, "NAME")
+        DX = getattr(self, "DX")
+        DPX = getattr(self, "DPX")
+        BETX = getattr(self, "BETX")
+        ALFX = getattr(self, "ALFX")
+        ANGLE = getattr(self, "ANGLE")
+        L = getattr(self, "L")
+        
+        for i in range(len(NAME)):
+            H = H + (DX[i] ** 2 + (DPX[i] * BETX[i] + DX[i] * ALFX[i]) ** 2) / BETX[i] * (abs(ANGLE[i])) ** 3 / L[i] ** 2
 
         return H
-
-
-# Read the twiss class from the twiss file
-#x=twiss('twiss')
-# use it as:
-#print x.Q1, x.Q2, x.BETX[0]
-
-
-# run beaMatrix for example:
-#x.beatMatrix()
-#print x.RM[0]
-
-
-# BETA-BEAT CORRECTION
-# first compute the response matrix by:
-# x.beatMatrix()
-# Define targetbeat as an array containing the desired changed in Dbeta/beta (x,y)
-# targetbeat=Dbeta/beta
-# dkl gives the required integrated strengths by: 
-# dkl=matrixmultiply(generalized_inverse(x.RM,0.003),targetbeat)
-
-
-#Want to explore the singular values?:
-#svd=singular_value_decomposition(x.RM)
-
-
-# Computing SEXTUPOLAR RESONANCE TERMS:
-# x.fterms()
-# The fterms are arrays evaluated at all the elements:
-# print x.f3000 , x.f2100  , x.f1020, x.f1002
-
-
-# COUPLING
-# Compute the Cmatrix, gamma, f1001 and f1010 from the Twiss file at all elements
-# x.Cmatrix()
-# print x.C[0]   (four components of C at the first elements)
-# print x.f1001
-# ...
-
-
