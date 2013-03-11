@@ -12,13 +12,13 @@ try:
 	from metaclass import *
 except:
 	from metaclass25 import *
-try:
-	from Numeric import *
-	from LinearAlgebra import *
-except:
-	from numpy import *
-	from numpy.linalg import pinv as  generalized_inverse
-	from numpy import dot as matrixmultiply
+#try:
+#	from Numeric import *
+#	from LinearAlgebra import *
+#except:
+from numpy import *
+from numpy.linalg import pinv as  generalized_inverse
+from numpy import dot as matrixmultiply
 
 import pickle
 #from Numeric import *
