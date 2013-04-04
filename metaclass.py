@@ -55,7 +55,7 @@ import numpy
 from numpy import dot as matrixmultiply
 from numpy.linalg import inv as inverse
 from numpy.linalg import det as determinant
-
+from errors import TwissError
 
 import sys
 
@@ -76,7 +76,15 @@ class twiss:
             else:
                 print "skipped value from dictionary because not in NAME. value: ", n
 
+    def __getattr__(self,name):
+        if name in self.keys:
+            return self.name
+        else:
+            raise TwissError(self,name+" is not in this file")
+
+
     def __init__(self, filename, dictionary=None):
+        self.filename=filename
         if dictionary is None:
             dictionary = {}
             
