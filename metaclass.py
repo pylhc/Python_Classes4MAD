@@ -369,25 +369,25 @@ class twiss:
         ALFX = getattr(self, "ALFX")
         ALFY = getattr(self, "ALFY")
 
-        J = numpy.reshape(numpy.array([0, 1, -1, 0]), (2, 2))
+        J = numpy.array([[0,1],[-1,0]])
         for j in range(0, len(S)):
             R = numpy.array([[R11[j], R12[j]], [R21[j], R22[j]]])
             
             C = matrixmultiply(-J, matrixmultiply(numpy.transpose(R), J))
-            C = (1 / numpy.sqrt(1 + determinant(R))) * C
+            C = C / numpy.sqrt(1 + determinant(R))
 
             g11 = 1 / numpy.sqrt(BETX[j])
             g12 = 0
             g21 = ALFX[j] / numpy.sqrt(BETX[j])
             g22 = numpy.sqrt(BETX[j])
-            Ga = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
+            Gx = numpy.array([[g11, g12], [g21, g22]])
 
             g11 = 1 / numpy.sqrt(BETY[j])
             g12 = 0
             g21 = ALFY[j] / numpy.sqrt(BETY[j])
             g22 = numpy.sqrt(BETY[j])
-            Gb = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
-            C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
+            Gy = numpy.array([[g11, g12], [g21, g22]])
+            C = matrixmultiply(Gx, matrixmultiply(C, inverse(Gy)))
             gamma = 1 - determinant(C)
             self.gamma.append(gamma)
             C = numpy.ravel(C)
@@ -399,8 +399,8 @@ class twiss:
         self.F1001I = numpy.array(self.f1001).imag
         self.F1010R = numpy.array(self.f1010).real
         self.F1010I = numpy.array(self.f1010).imag
-        self.F1001W = numpy.sqrt(self.F1001R ** 2 + self.F1001I ** 2)
-        self.F1010W = numpy.sqrt(self.F1010R ** 2 + self.F1010I ** 2)
+        self.F1001W = abs(self.f1001)
+        self.F1010W = abs(self.f1010)
 
     def beatMatrix(self):
         '''
