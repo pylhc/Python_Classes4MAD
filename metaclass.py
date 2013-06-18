@@ -79,6 +79,8 @@ class twiss:
     def __init__(self, filename, dictionary=None):
         if dictionary is None:
             dictionary = {}
+            
+        self.filename = filename # Added to see which file it is during debugging (vimaier)
         self.indx = {}
         self.keys = []
         alllabels = []
@@ -89,6 +91,8 @@ class twiss:
         else:
             f = open(filename, 'r')
         for line in f:
+            isLineParsed = False # Check if line was parsed otherwise print info (vimaier)
+            
             if line.startswith("#"): # comment line
                 continue
             
@@ -97,6 +101,7 @@ class twiss:
             split_line = line.split()
             
             if ("@ " in line and "%" in line and "s" not in split_line[2]):
+            # Float-Descriptor-line
                 label = split_line[1]
                 try:
                     setattr(self, label, float(split_line[3].replace("\"", "")))
@@ -107,20 +112,28 @@ class twiss:
                         setattr(self, label, split_line[3].replace("\"", ""))
                     except:
                         print "Problem persists, let's ignore it!"
+                isLineParsed = True
             elif ("@ " in line and "s" in split_line[2]):
+            # String-Descriptor-line
                 label = split_line[1].replace(":", "")
                 setattr(self, label, split_line[3].replace("\"", ""))
-
+                isLineParsed = True
+                
             if ("* " in line or "*\t" in line):
+            # Columns-names-line
                 alllabels = split_line
                 for alllabels_item in alllabels[1:]:
                     setattr(self, alllabels_item, [])
                     self.keys.append(alllabels_item)
+                isLineParsed = True
 
             if ("$ " in line or "$\t" in line):
+            # Columns-datatypes-line
                 alltypes = split_line
+                isLineParsed = True
 
             if ("@" not in line and "*" not in line and "$" not in line and "#" not in line):
+            # Table-entry-line
                 values = split_line
                 for j in range(0,len(values)):
                     if ("%hd" in alltypes[j + 1]):
@@ -134,6 +147,10 @@ class twiss:
                             self.indx[values[j].replace("\"", "")] = len(NAME) - 1
                             self.indx[values[j].replace("\"", "").upper()] = len(NAME) - 1
                             self.indx[values[j].replace("\"", "").lower()] = len(NAME) - 1
+                isLineParsed = True
+            
+            if not isLineParsed:
+                print >> sys.stderr,"Did not parse line ("," ".join(split_line),") in ",filename
 
         f.close()
         try:
