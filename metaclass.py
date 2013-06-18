@@ -452,14 +452,18 @@ class twiss:
                     bys = self.abh(BETY[i], ALFY[i], kL, k) * L[i]
                     toty = toty + bys
                     totl = totl + L[i]
-                    print NAME[i], S[i], L[i], self.ab(BETX[i], ALFX[i], kL, k), self.abh(BETY[i], ALFY[i], kL, k)
+                    abx=self.ab(BETX[i], ALFX[i], kL, k)
+                    aby= self.abh(BETY[i], ALFY[i], kL, k)
+                    print NAME[i], S[i], L[i], abx, aby, abx*K1L[i],aby*K1L[i] 
                 if K1L[i] < 0:
                     bxs = self.abh(BETX[i], ALFX[i], kL, k) * L[i]
                     totx = totx + bxs
                     bys = self.ab(BETY[i], ALFY[i], kL, k) * L[i]
                     toty = toty + bys
                     totl = totl + L[i]
-                    print NAME[i], S[i], L[i], self.abh(BETX[i], ALFX[i], kL, k), self.ab(BETY[i], ALFY[i], kL, k)
+                    abx=self.abh(BETX[i], ALFX[i], kL, k)
+                    aby=self.ab(BETY[i], ALFY[i], kL, k)
+                    print NAME[i], S[i], L[i], abx, aby, abx*K1L[i],aby*K1L[i] 
             else:
                 print NAME[i], S[i], L[i], BETX[i], BETY[i]
             print "TOTAL", S[i], totl, totx, toty
