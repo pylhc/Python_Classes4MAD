@@ -156,9 +156,8 @@ class twiss:
         try:
             alltypes
         except:
-            print "From Metaclass: Bad format or empty file ", filename
-            print "Leaving Metaclass"
-            exit(1)
+            print >> sys.stderr, "From Metaclass: Bad format or empty file ", filename
+            raise ValueError
 
 
         for j in range(1, len(alllabels)):
