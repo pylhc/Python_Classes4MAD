@@ -15,9 +15,11 @@ import subprocess
 import optparse
 import sys
 
+
 globalMadxPath = "/afs/cern.ch/group/si/slap/bin/madx"
 
-def runForInputFile(filePath, madxPath=globalMadxPath, stdout = None):
+
+def runForInputFile(filepath, madxPath=None, stdout=None):
     """
     Run MADX with the given file as input, returns the errorcode from MADX as int.
     Arguments:
@@ -29,12 +31,15 @@ def runForInputFile(filePath, madxPath=globalMadxPath, stdout = None):
                    - open(os.devnull, "w"): Suppress any std messages
                    - open(path): Write to file located at path
     """
-    fileOptions = open(filePath, "r")
-    stringInput = fileOptions.read()
-    returnCode = runForInputString(stringInput, madxPath, stdout)
+    if madxPath is None:
+        madxPath = globalMadxPath
+    command = [madxPath, filepath]
+    process = subprocess.Popen(command, shell=False, stdin=subprocess.PIPE, stdout=stdout)
+    returnCode = process.wait()
     return returnCode
 
-def runForInputString(stringInput, madxPath=globalMadxPath, stdout = None):
+
+def runForInputString(stringInput, madxPath=None, stdout=None):
     """
     Run MADX with the given string as input, returns the errorcode from MADX as int.
     Arguments:
@@ -46,6 +51,8 @@ def runForInputString(stringInput, madxPath=globalMadxPath, stdout = None):
                    - open(os.devnull, "w"): Suppress any std messages
                    - open(path): Write to file located at path
     """
+    if madxPath is None:
+        madxPath = globalMadxPath
     process = subprocess.Popen(madxPath, shell=False, stdin=subprocess.PIPE, stdout=stdout)
     process.communicate(stringInput)
     returnCode = process.wait()
