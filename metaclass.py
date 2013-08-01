@@ -81,6 +81,7 @@ class twiss:
             dictionary = {}
             
         self.filename = filename # Added to see which file it is during debugging (vimaier)
+        self.__has_parsed_a_table_row = False 
         self.indx = {}
         self.keys = []
         alllabels = []
@@ -147,6 +148,7 @@ class twiss:
                             self.indx[values[j].replace("\"", "")] = len(NAME) - 1
                             self.indx[values[j].replace("\"", "").upper()] = len(NAME) - 1
                             self.indx[values[j].replace("\"", "").lower()] = len(NAME) - 1
+                self.__has_parsed_a_table_row = True
                 is_line_parsed = True
             
             if not is_line_parsed:
@@ -166,6 +168,12 @@ class twiss:
 
         if len(dictionary) > 0:
             self.forknames(dictionary)
+            
+    def has_bpm_data(self):
+        return self.__has_parsed_a_table_row
+    
+    def has_no_bpm_data(self):
+        return not self.has_bpm_data()
 
     def chrombeat(self):
         '''
