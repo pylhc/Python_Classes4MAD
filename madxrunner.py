@@ -9,6 +9,8 @@ version 2 20101019 (tbach)
 
 version 1 20101019 (tbach)
  - init
+ 
+Execute "git log madxrunner.py" for changes!
 """
 
 import subprocess
@@ -17,6 +19,15 @@ import sys
 
 
 globalMadxPath = "/afs/cern.ch/group/si/slap/bin/madx"
+
+
+def get_sys_dependent_path_to_mad_x():
+    """
+    For now, it returns always path to linux binary.
+    For the future, it could return the win binary from Beta-Beat.src/binaries/madx
+    """
+    #TODO: Copy madx binaries to Beta-Beat.src(vimaier)
+    return globalMadxPath
 
 
 def runForInputFile(filepath, madxPath=None, stdout=None):
