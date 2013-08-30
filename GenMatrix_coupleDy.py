@@ -2,20 +2,13 @@
 
 
 
-# Just to make sure that the path to the libraires is defined 
+# Just to make sure that the path to the libraires is defined
 import sys
 #sys.path.append('/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/')
 
 
 #--- beta beat for store with numpy
-try:
-	from metaclass import *
-except:
-	from metaclass25 import *
-#try:
-#	from Numeric import *
-#	from LinearAlgebra import *
-#except:
+from metaclass import *
 from numpy import *
 from numpy import linalg
 from numpy.linalg import pinv as generalized_inverse
@@ -51,27 +44,27 @@ def MakeList(x, m, modelcut, errorcut, CorD):
 			cou=cou+1
 		else:
 			if (CorD=='C'):
-				
+
 				if ((abs(x.F1001W[x.indx[bn]]-m.F1001W[x.indx[bn]]) < modelcut) and (x.FWSTD1[x.indx[bn]] < errorcut)):
-			
-				
+
+
 					t.append(x.NAME[i])
-					
+
 			elif(CorD=='D'):
 				if ((abs(x.DY[x.indx[bn]]-m.DY[x.indx[bn]]) < modelcut) and (x.STDDY[x.indx[bn]] < errorcut)):
 					t.append(x.NAME[i])
 	if cou > 0:
 		print "Warning: ", cou, "BPMs removed from data for not beeing in the model"
 
-	
-	return t	
+
+	return t
 
 
 
 ########################
 def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
 ###########################################
-# not used actually for coupling and Dy correction 
+# not used actually for coupling and Dy correction
 	t=[]
         cou=0
 	keys=x.__dict__.keys()
@@ -81,7 +74,7 @@ def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
 		phmdl="PHXMDL"
 	for i in range(len(x.NAME)):
 		phm=x.__dict__[phmdl][i]
-		
+
 		if (x.STDPH[i] < errorcut and abs(x.PHASE[i]-phm) < modelcut):
 			#print x.STDPH[i], errorcut, abs(x.PHASE[i]-phm)
 			try:
@@ -98,7 +91,7 @@ def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
 	if cou > 0:
 		print "Warning: ", cou, "BPM pairs removed from data for not beeing in the model or having too large error deviations: ", phmdl, modelcut, "STDPH",errorcut, "LEN", len(t)
 	return t
-		
+
 
 
 
@@ -147,29 +140,29 @@ def coupling(a,b):
 def correctcouple(a, dispy, couple_input, cut=0.01, app=0, path="./"):
 ################################################
 
-	
-	
-	R=   transpose(couple_input.sensitivity_matrix) 
+
+
+	R=   transpose(couple_input.sensitivity_matrix)
 	vector=couple_input.computevector(a,dispy)
 	wg=couple_input.wg
 #        print wg
 	#print couple_input.couplelist
 
-	
+
 	#print len(couple_input.couplelist), wg[2]
 	weisvec=array(concatenate([sqrt(wg[0])*ones(len(couple_input.couplelist)),sqrt(wg[1])*ones(len(couple_input.couplelist)),sqrt(wg[2])*ones(len(couple_input.couplelist)),sqrt(wg[3])*ones(len(couple_input.couplelist)),sqrt(wg[4])*ones(len(couple_input.dispylist))]))
 
 	#print "here here",str(weisvec)
-	
+
 	Rnew=transpose(transpose(R)*weisvec)
 
 
-	
+
 	delta=-matrixmultiply(generalized_inverse(Rnew,cut),(vector-couple_input.zerovector)/couple_input.normvector)
 
-	
+
 	writeparams(delta, couple_input.varslist, app,  path=path)
-	
+
 	return [delta, couple_input.varslist]
 
 
@@ -183,7 +176,7 @@ class couple_input:
 
 #			print couplelist.F1001R
 #			sys.exit
-			
+
 			self.dispylist=dispylist
 			self.wg=wg
 
@@ -207,7 +200,7 @@ class couple_input:
 
 		#print concatenate([f1001r,f1001i,f1010r,f1010i,dy])
 		vector=array(concatenate([f1001r,f1001i,f1010r,f1010i,dy]))
-				
+
 		return array(concatenate([f1001r,f1001i,f1010r,f1010i,dy]))
 
 
@@ -224,13 +217,13 @@ class couple_input:
     		self.normvector=array(concatenate([ones(len(self.couplelist)),ones(len(self.couplelist)),ones(len(self.couplelist)),ones(len(self.couplelist)),ones(len(self.dispylist)) ]))*1.0
     		for var in self.varslist:
         		vector=self.computevector(x[var], x[var])
-			
+
         		self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
     		self.sensitivity_matrix=array(self.sensitivity_matrix)
 
-		
+
 		return self.sensitivity_matrix
-    
+
 
 ########### START ###############
 '''
@@ -255,7 +248,7 @@ beat_inp=beat_input(varslist, phasexlist, phaseylist, betaxlist, betaylist, disp
 
 
 sensitivity_matrix=beat_inp.computeSensitivityMatrix(FullResponse)
-    
+
 y=twiss('twiss.base')
 
 x=twiss('twiss.dat')
@@ -267,14 +260,14 @@ print betabeat(x,y)
 
 #------ Apply svd correction
 correctbeat(x, beat_inp, cut=0.04, app=0)
-    
+
 #----- compute twiss after correction
 #system('madx < job.random.madx > scum  ')
 #z=twiss('twiss.dat')
 #bb1=betabeat(x,y);bb=betabeat(z,y)
-    
-'''
-    
-    
 
-    
+'''
+
+
+
+

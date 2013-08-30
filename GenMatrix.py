@@ -2,16 +2,13 @@
 
 
 
-# Just to make sure that the path to the libraires is defined 
+# Just to make sure that the path to the libraires is defined
 import sys
 #sys.path.append('/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/')
 
 
 #--- beta beat for store with numpy
-try:
-	from metaclass import *
-except:
-	from metaclass25 import *
+from metaclass import *
 #try:
 #	from Numeric import *
 #	from LinearAlgebra import *
@@ -50,8 +47,8 @@ def MakeList(x,m):
 			t.append(x.NAME[i])
 	if cou > 0:
 		print "Warning: ", cou, "BPMs removed from data for not beeing in the model"
-	return t	
-			
+	return t
+
 
 ########################
 def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
@@ -63,15 +60,15 @@ def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
 		phmdl="PHYMDL"
 		STD=x.STDPHY
 		PHASE=x.PHASEY
-		
+
 	else:
 		phmdl="PHXMDL"
 		STD=x.STDPHX
 		PHASE=x.PHASEX
-		
+
 	for i in range(len(x.NAME)-1):    # The -1 comes from the fact that the last BPM is again the first BPM, model not ready for this
 		phm=x.__dict__[phmdl][i]
-		
+
 		if (STD[i] < errorcut and abs(PHASE[i]-phm) < modelcut):
 			#print x.STDPH[i], errorcut, abs(x.PHASE[i]-phm)
 			try:
@@ -88,7 +85,7 @@ def MakePairs(x,m, modelcut=0.1, errorcut=0.027):
 	if cou > 0:
 		print "Warning: ", cou, "BPM pairs removed from data for not beeing in the model or having too large error deviations: ", phmdl, modelcut, "STDPH",errorcut, "LEN", len(t)
 	return t
-		
+
 
 
 
@@ -114,7 +111,7 @@ def writeparams(deltafamilie, variables, app=0, path="./"):
         i +=1
     g.close();f.close()
     return
-							
+
 #################################################
 def betabeat(a,b):
 #############################################################
@@ -172,7 +169,7 @@ def betabeatEXP(x,y,b):
 	dphiyb.append(b.MUY[b.indx[bpm2]]-b.MUY[b.indx[bpm1]])
     dphixa=array(dphixa);dphiya=array(dphiya)
     dphixb=array(dphixb);dphiyb=array(dphiyb)
-    if len(dphixa)>0:    
+    if len(dphixa)>0:
 	    rmsphix=sqrt(sum((dphixa-dphixb)**2)/len(dphixa))
 	    peakphix=max(abs(dphixa-dphixb));
     else:
@@ -186,8 +183,8 @@ def betabeatEXP(x,y,b):
 	    rmsphiy=0
 	    peakphiy=0
 	    print "Warning: No vertical BPMs matching when computing beta-beating"
-    
-    
+
+
 
     #return array([rmsx,rmsy, peakx, peaky])
     return array([rmsx,rmsy, peakx,peaky, rmsphix,rmsphiy,
@@ -198,7 +195,7 @@ def betabeatEXP(x,y,b):
 ##########################################
 def correctbeat(a,beat_input, cut=0.01, app=0, path="./"):
 ################################################
-	R=   transpose(beat_input.sensitivity_matrix) 
+	R=   transpose(beat_input.sensitivity_matrix)
 	vector=beat_input.computevector(a)
 	wg=beat_input.wg
 	weisvec=array(concatenate([sqrt(wg[0])*ones(len(beat_input.phasexlist)),
@@ -229,7 +226,7 @@ def correctbeatEXP(x,y,dx,beat_input, cut=0.01, app=0, path="./",xbet=[],ybet=[]
 	delta=-matrixmultiply(generalized_inverse(Rnew,cut),(vector-beat_input.zerovector)/beat_input.normvector)
         writeparams(delta, beat_input.varslist, app, path)
 	return [delta, beat_input.varslist]
-			
+
 
 
 
@@ -260,7 +257,7 @@ class beat_input:
 		for ph in self.phasexlist:
 			[bpm1,bpm2]=ph.split()
 			phix.append(x.PHASEX[x.indx[bpm1]])
-		
+
 		for ph in self.phaseylist:
                         [bpm1,bpm2]=ph.split()
                         phiy.append(y.PHASEY[y.indx[bpm1]])
@@ -270,16 +267,16 @@ class beat_input:
 			betx.append(xbet.BETX[xbet.indx[b]])
 		for b in self.betaylist:
 			bety.append(ybet.BETY[ybet.indx[b]])
-			
+
 		return array(concatenate([phix,phiy,betx,bety,disp,[x.Q1],[y.Q2]]))
-	
+
 
 
 	#####################
 	def computevector(self,x):
 	##################################################################################
     		phix=[]
- 		phiy=[]		
+ 		phiy=[]
     		betx=[]
     		bety=[]
     		disp=[]
@@ -317,7 +314,7 @@ class beat_input:
         		self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
     		self.sensitivity_matrix=array(self.sensitivity_matrix)
 		return self.sensitivity_matrix
-    
+
 
 ########### START ###############
 '''
@@ -342,7 +339,7 @@ beat_inp=beat_input(varslist, phasexlist, phaseylist, betaxlist, betaylist, disp
 
 
 sensitivity_matrix=beat_inp.computeSensitivityMatrix(FullResponse)
-    
+
 y=twiss('twiss.base')
 
 x=twiss('twiss.dat')
@@ -354,14 +351,14 @@ print betabeat(x,y)
 
 #------ Apply svd correction
 correctbeat(x, beat_inp, cut=0.04, app=0)
-    
+
 #----- compute twiss after correction
 #system('madx < job.random.madx > scum  ')
 #z=twiss('twiss.dat')
 #bb1=betabeat(x,y);bb=betabeat(z,y)
-    
-'''
-    
-    
 
-    
+'''
+
+
+
+

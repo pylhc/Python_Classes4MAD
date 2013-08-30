@@ -1,21 +1,21 @@
-#-- class for fitting algorithms 
+#-- class for fitting algorithms
 #-- Polynomial fitting (least squares type) - see usage below
 #-- non-linear least sq - NOT IMPLEMENTED
 #--- R. Calaga, July 9, 2009
 
 import os, sys
 try:
-    import numpy as npy; PINV=npy.linalg.pinv; 
+    from metaclass import twiss
+    import numpy as npy; PINV=npy.linalg.pinv;
     tp=npy.transpose; INV=npy.linalg.inv;
-    from metaclass25 import twiss;
 except ImportError:
     try:
         import Numeric as npy
         from LinearAlgebra import generalized_inverse as PINV
-        from metaclass import twiss; tp=npy.transpose
+        tp=npy.transpose
     except ImportError: print "No Numpy -or- Numeric";sys.exit()
 
-    
+
 
 
 class FIT:
@@ -29,12 +29,12 @@ class FIT:
     S = inv(A'*inv(V)*A)*mse
     stdx = sqrt(diag(S))
     '''
-    
+
     def __init__(self, X,Y,m,tol=1.0e-15):
         if len(X) != len(Y):  raise ValueError, 'unequal length'
-        self.xD=X; self.yD=Y; self.m=m; self.tol=tol; 
+        self.xD=X; self.yD=Y; self.m=m; self.tol=tol;
         self.err=[]; self.dof=len(X)-m-1
-    
+
     def rmatrix(self):
         #--- p(x)=c[0]+c[1]x+...+c[m]x^m
         a = npy.zeros((self.m+1,self.m+1))*1.0
@@ -51,12 +51,12 @@ class FIT:
             for j in range(self.m+1):
                 a[i,j]=s[i+j]
         return a,b
-        
+
     def help(self):
         print 'a=FIT(xd,yd,2,tol=1e-14)'
         print 'a=linreg()'
-        print 'Using SVD: coeff,errors=a.SVDFIT()' 
-        print 'Using QR: coeff,errors=a.QRFIT()' 
+        print 'Using SVD: coeff,errors=a.SVDFIT()'
+        print 'Using QR: coeff,errors=a.QRFIT()'
 
     def QRFIT(self):
         self.a,self.b=self.rmatrix()
@@ -64,8 +64,8 @@ class FIT:
         Q,R=npy.linalg.qr(self.a)
         d=INV(npy.dot(INV(R),R))
         d=npy.diag(npy.dot(d,npy.eye(len(R))))
-        c=npy.dot(INV(R),npy.dot(INV(Q),self.b))      
-        #dc = t*sqrt(1+sumsq (A/s.R, 2))*resid/sqrt(sef.dof)                
+        c=npy.dot(INV(R),npy.dot(INV(Q),self.b))
+        #dc = t*sqrt(1+sumsq (A/s.R, 2))*resid/sqrt(sef.dof)
         e=self.error(c)
         return c,e
 
@@ -78,8 +78,8 @@ class FIT:
         return c,e
 
     def var(self,x):
-        return npy.mean(npy.abs(x-npy.mean(x))**2) 
-    
+        return npy.mean(npy.abs(x-npy.mean(x))**2)
+
 #    def error(self, c):
 #        resid=npy.dot(self.a,c)-self.b
 #        rms=npy.sqrt(npy.inner(resid,resid)/len(resid))
@@ -87,7 +87,7 @@ class FIT:
 #        Rsq=1-SS/(YtY-len(self.b)*npy.mean(self.b)**2)
 #        sig=self.residual(c)
 #        return err
-    
+
     def error(self,c):
         YtY=npy.dot(tp(self.b),self.b)
         XtX=npy.dot(tp(self.a),self.a)
@@ -95,7 +95,7 @@ class FIT:
         def evalPoly(c,x):
             m=len(c)-1; p=c[m]
             for j in range(m): p=p*x+c[m-j-1]
-            return p    
+            return p
         n=len(self.xD)-1; m=len(c)-1; sigma=0.0
         for i in range(n+1):
             p = evalPoly(c,self.xD[i])
@@ -112,9 +112,9 @@ class FIT:
                Linear regression of y = ax + b
         Usage
                [coeff], [err] = FIT.linreg()
-               Returns coefficients to the regression line "y=ax+b" 
+               Returns coefficients to the regression line "y=ax+b"
                from x[] and y[], and R^2 Value
-        """        
+        """
         print "Using linear regression"
         N=len(self.xD); Sx=Sy=Sxx=Syy=Sxy=0.0
         for x, y in map(None, self.xD, self.yD):
@@ -136,24 +136,24 @@ class FIT:
 
 if __name__ == "__main__":
     #import numpy as npy
-    from random import random; 
+    from random import random;
     xd=npy.arange(10)
     yd=map(lambda x: 1.2*x+4+(0.5-random())*5e-4, xd)
-    
+
     #--- polyFit(xData, yData, polynomial_order, tolerance)
     a=FIT(xd,yd,1,tol=1e-14)
     cf,ce=a.QRFIT() #--- or QRFIT
-    for j in range(len(cf)): 
+    for j in range(len(cf)):
         print 'x^'+str(j)+': ',cf[j],'+/-',ce[j]
 
     #-- plot
     #import pylab
     #ydf=map(lambda x: cf[2]*x**2+cf[1]*x+cf[0], xd)
     #pylab.scatter(xd,yd);pylab.plot(xd,ydf);pylab.show()
-    
+
     print '\n'
-    cf,ce=a.linreg() 
+    cf,ce=a.linreg()
     print 'x^0:',cf[1], '+/-', ce[1]
     print 'x^1:',cf[0], '+/-', ce[0]
-    
-    
+
+

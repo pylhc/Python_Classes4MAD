@@ -2,7 +2,7 @@
 
 
 
-# Just to make sure that the path to the libraires is defined 
+# Just to make sure that the path to the libraires is defined
 import sys
 #sys.path.append('/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/')
 
@@ -13,7 +13,7 @@ import pickle
 from numpy import *
 #from numpy.oldnumeric.linear_algebra import generalized_inverse
 from os import system
-from metaclass25 import twiss
+from metaclass import *
 import random,re
 from AllLists import *
 #from LinearAlgebra import *
@@ -26,7 +26,7 @@ def MakePairs(x):
         for i in range(len(x.NAME)):
                 t.append(x.NAME[i]+' '+x.NAME2[i])
         return t
-						
+
 
 ##################################################
 def writeparams(deltafamilie, variables, app=0):
@@ -36,7 +36,7 @@ def writeparams(deltafamilie, variables, app=0):
     g = open ('changeparameters', mode)
     i=0
     print len(variables), len(deltafamilie)
-    for var in variables:      
+    for var in variables:
         g.write(var+' = '+ var+' + ( '+str(deltafamilie[i])+' );\n')
         i +=1
     g.close()
@@ -78,10 +78,10 @@ def betabeat(a,b):
 
 def correctbeat(a,beat_input, cut=0.01, app=0):
     #global zerovector, R, sigmaphase, dx, sensitivity_matrix, normvector
-    
+
     R=   transpose(beat_input.sensitivity_matrix)  #Transpose is dangerous, shares memory with initial array!!!
     vector=beat_input.computevector(a)
-    #print len(vector), len(zerovector), len(generalized_inverse(R,cut)), len(R[0]) 
+    #print len(vector), len(zerovector), len(generalized_inverse(R,cut)), len(R[0])
 
     #print sqrt(wg[0]), sqrt(wg[1]), sqrt(wg[2],sqrt(wg[3])),'\n'
     #---- weights for phix, phiy,betax, betay,  disp,tunes
@@ -123,7 +123,7 @@ class beat_input:
 	def computevector(self,x):
 	##################################################################################
     		phix=[]
- 		phiy=[]		
+ 		phiy=[]
     		betx=[]
     		bety=[]
     		disp=[]
@@ -159,7 +159,7 @@ class beat_input:
         		self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
     		self.sensitivity_matrix=array(self.sensitivity_matrix)
 		return self.sensitivity_matrix
-    
+
 
 ########### START ###############
 '''
@@ -184,7 +184,7 @@ beat_inp=beat_input(varslist, phasexlist, phaseylist, betaxlist, betaylist, disp
 
 
 sensitivity_matrix=beat_inp.computeSensitivityMatrix(FullResponse)
-    
+
 y=twiss('twiss.base')
 
 x=twiss('twiss.dat')
@@ -196,14 +196,14 @@ print betabeat(x,y)
 
 #------ Apply svd correction
 correctbeat(x, beat_inp, cut=0.04, app=0)
-    
+
 #----- compute twiss after correction
 #system('madx < job.random.madx > scum  ')
 #z=twiss('twiss.dat')
 #bb1=betabeat(x,y);bb=betabeat(z,y)
-    
-'''
-    
-    
 
-    
+'''
+
+
+
+

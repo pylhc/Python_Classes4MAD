@@ -6,24 +6,10 @@
 
 import sys,os,time,datetime,string
 ver=sys.version; print "Using Python",string.split(ver)[0]
-#try:
-#    import numpy as npy; default=0
-#    from GenMatrix25 import *
-#    from metaclass25 import twiss
-#except ImportError:
-#    try:
-#        import Numeric as npy; default=1
-#        from GenMatrix import *
-#        from metaclass import twiss
-#        import MLab
-#    except ImportError: sys.exit()
 
 
 #import Numeric as npy
-try:
-	from metaclass import *
-except:
-	from metaclass25 import *
+from metaclass import *
 try:
 	from Numeric import *
 except:
@@ -95,7 +81,7 @@ def calcRMSNumeric(R):
 def sortDict(adict):
     list=sorted(adict.items(), key=lambda (k,v): (v,k))
     for item in list: print item[0],":",item[1]
-    
+
 def bCorr(X,Y,DX, beat_input, cut=0.001,app=0,path="./"):
     R=transpose(beat_input.sensitivity_matrix)
     b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
@@ -194,7 +180,7 @@ def bNCorrNumeric(X,Y,DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9,path="
     corr=beat_input.varslist;
     # "-" sign added, to be verified by Ram (1-Aug-2008)
     #-- sign removed by Ram, look comment below in loop(Nov 27, 2009)
-    inva= generalized_inverse(R,cut);  
+    inva= generalized_inverse(R,cut);
     RHO2={};rmss,ptopp=calcRMSNumeric(b)
     print 'Initial Phase-beat {RMS,PK2PK}:', rmss,ptopp
     for ITER in range(ncorr):
@@ -276,7 +262,7 @@ if __name__ == "__main__":
     #          "b109"]
 
     varslist=quadvarsb1();variables=varslist
-    
+
     phasexlist=MakePairs(x, FullResponse['0'],modelcut=0.02, errorcut=0.013)
     phaseylist=MakePairs(y, FullResponse['0'],modelcut=0.02, errorcut=0.013)
     betaxlist=[]; betaylist=betaxlist; dx=[]
@@ -305,6 +291,6 @@ if __name__ == "__main__":
        # bNCorrNumeric(x,y,dx,beat_inp, cut=0.1,ncorr=10, app=0,tol=1e-4,path='./')
        itrSVD(x,y,dx,beat_inp, cut=0.1,iter=1, app=0,tol=1e-4,path='./')
     else: print "No numpy or Numeric modules"
-    
+
     sys.exit()
 '''

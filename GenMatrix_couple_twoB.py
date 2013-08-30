@@ -2,26 +2,18 @@
 
 
 
-# Just to make sure that the path to the libraires is defined 
+# Just to make sure that the path to the libraires is defined
 import sys
 sys.path.append('/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/')
 
- 
+
 #--- beta beat for store with numpy
 
 import pickle
-#try:
-from metaclass import twiss
-#except:
-#       from metaclass25 import *
-#try:
+from metaclass import *
 from numpy import *
 from numpy import dot as matrixmultiply
 from numpy.linalg import pinv as generalized_inverse
-#except:
-#	from Numeric import *
-#        from LinearAlgebra import *
-        
 
 from os import system
 import random,re
@@ -51,20 +43,20 @@ def MakeListCD(x, m, modelcut, errorcut, CorD):
 			cou=cou+1
 		else:
 			if (CorD=='C'):
-				
+
 				if ((abs(x.F1001W[x.indx[bn]]-m.F1001W[x.indx[bn]]) < modelcut) and (x.FWSTD1[x.indx[bn]] < errorcut)):
-			
-				
+
+
 					t.append(x.NAME[i])
-					
+
 			elif(CorD=='D'):
 				if ((abs(x.DY[x.indx[bn]]-m.DY[x.indx[bn]]) < modelcut) and (x.STDDY[x.indx[bn]] < errorcut)):
 					t.append(x.NAME[i])
 	if cou > 0:
 		print "Warning: ", cou, "BPMs removed from data for not beeing in the model"
 
-	
-	return t	
+
+	return t
 
 
 
@@ -112,7 +104,7 @@ def coupling(a,b):
 def correctcouple(a, dispy, couple_input, cut=0.01, app=0, path="./"):
 ################################################
 	print "one"
-	R=   transpose(couple_input.sensitivity_matrix) 
+	R=   transpose(couple_input.sensitivity_matrix)
 	vector=couple_input.computevector(a,dispy)
 	wg=couple_input.wg
 	print len(couple_input.couplelist), wg[2]
@@ -150,7 +142,7 @@ class couple_input:
 		for bpm in self.dispylist:
 			dy.append(dispy.DY[dispy.indx[bpm]])
 
-				
+
 		return array(concatenate([f1001r,f1001i,f1010r,f1010i,dy]))
 
 
@@ -170,13 +162,13 @@ class couple_input:
         		self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
     		self.sensitivity_matrix=array(self.sensitivity_matrix)
 		return self.sensitivity_matrix
-    
+
 
 
 ##########################################
 def correctcouple2(couple, couple2, dispy, dispy2, couple_input2, cut=0.01, app=0, path="./"):
 ################################################
-	R=transpose(couple_input2.sensitivity_matrix) 
+	R=transpose(couple_input2.sensitivity_matrix)
 	vector=couple_input2.computevector2(couple, couple2, dispy, dispy2)
 	wg=couple_input2.wg
 	weisvec=array(concatenate([sqrt(wg[0])*ones(len(couple_input2.couplelist)),
@@ -204,7 +196,7 @@ class couple_input2:
 			self.couplelist=couplelist
 			self.couplelist2=couplelist2
 			self.dispylist=dispylist
-			self.dispylist2=dispylist2     	
+			self.dispylist2=dispylist2
 			self.wg=wg
 
 
@@ -226,13 +218,13 @@ class couple_input2:
 			f1001i.append(couple2.F1001I[couple2.indx[bpm]])
 			f1010r.append(couple2.F1010R[couple2.indx[bpm]])
 			f1010i.append(couple2.F1010I[couple2.indx[bpm]])
-		
-			
+
+
 		for bpm in self.dispylist:
 			dy.append(dispy.DY[dispy.indx[bpm]])
 		for bpm in self.dispylist2:
 			dy.append(dispy2.DY[dispy2.indx[bpm]])
-			
+
 
 		return array(concatenate([f1001r,f1001i,f1010r,f1010i,dy]))
 
