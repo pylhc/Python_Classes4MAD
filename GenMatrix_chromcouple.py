@@ -107,8 +107,8 @@ def writeparams(deltafamilie, variables, app=0, path="./"):
     if (app == 0):mode='w'
     if (app == 1):mode='a'
     a = datetime.datetime.fromtimestamp(time.time())
-    g = open (path+'/changeparameters_couple', mode)
-    f = open (path+'/changeparameters_couple.tfs', mode)
+    g = open (path+'/changeparameters_chromcouple', mode)
+    f = open (path+'/changeparameters_chromcouple.tfs', mode)
     print "Until here "+path
     print >>f, "@", "APP", "%le", app
     print >>f, "@", "PATH","%s", path
