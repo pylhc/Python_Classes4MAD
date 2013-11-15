@@ -28,15 +28,13 @@ def make_list(x, m, modelcut, errorcut, CorD):
     for i in range(len(x.NAME)):
         bn = x.NAME[i].upper()
         if bn in m.indx:
-            indx = x.indx[bn]
-            # TODO: probably bug due to using same index for x and m. Should be two different. 
-            # Github issue: https://github.com/pylhc/Python_Classes4MAD/issues/1 
-            # -- (vimaier)
-            if (CorD=='C'):
-                if ((abs(x.F1001W[indx]-m.F1001W[indx]) < modelcut) and (x.FWSTD1[indx] < errorcut)):
+            i_x = x.indx[bn]
+            i_m = m.indx[bn]
+            if CorD == 'C':
+                if ((abs(x.F1001W[i_x]-m.F1001W[i_m]) < modelcut) and (x.FWSTD1[i_x] < errorcut)):
                     result_names_list.append(x.NAME[i])
-            elif(CorD=='D'):
-                if ((abs(x.DY[indx]-m.DY[indx]) < modelcut) and (x.STDDY[indx] < errorcut)):
+            elif CorD == 'D':
+                if ((abs(x.DY[i_x]-m.DY[i_m]) < modelcut) and (x.STDDY[i_x] < errorcut)):
                     result_names_list.append(x.NAME[i])
         else:
             print "Not in Response:", bn

@@ -28,22 +28,12 @@ def make_list(x, m, modelcut, errorcut, CorD):
     for i in range(len(x.NAME)):
         bn = x.NAME[i].upper()
         if bn in m.indx:
-            indx = x.indx[bn]
-            # TODO: probably bug due to using same index for x and m. Should be two different. 
-            # Github issue: https://github.com/pylhc/Python_Classes4MAD/issues/1 
-            # -- (vimaier)
-#            index_in_x = indx
-#            index_in_m = m.indx[bn]
-#            wrong_value = abs(x.Cf1001r[indx]-m.Cf1001r[indx])
-#            correct_value = abs(x.Cf1001r[index_in_x]-m.Cf1001r[index_in_m])            
-#            print "x.indx[bn]", x.indx[bn]
-#            print "m.indx[bn]", m.indx[bn]
-#            print "abs(x.Cf1001r[indx]-m.Cf1001r[indx])", abs(x.Cf1001r[indx]-m.Cf1001r[indx])
-#            print "abs(x.Cf1001r[index_in_x]-m.Cf1001r[index_in_m])", abs(x.Cf1001r[index_in_x]-m.Cf1001r[index_in_m])
-            if ((abs(x.Cf1001r[indx]-m.Cf1001r[indx]) < modelcut)
-                        and (abs(x.Cf1001i[indx]-m.Cf1001i[indx]) < modelcut)
-                        and (x.Cf1001iERR[indx] < errorcut)
-                        and (x.Cf1001rERR[indx] < errorcut)):
+            i_x = x.indx[bn]
+            i_m = m.indx[bn]
+            if ((abs(x.Cf1001r[i_x]-m.Cf1001r[i_m]) < modelcut)
+                        and (abs(x.Cf1001i[i_x]-m.Cf1001i[i_m]) < modelcut)
+                        and (x.Cf1001iERR[i_x] < errorcut)
+                        and (x.Cf1001rERR[i_x] < errorcut)):
                 result_names_list.append(x.NAME[i])
         else:
             print "Not in Response:", bn
