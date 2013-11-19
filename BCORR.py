@@ -4,52 +4,50 @@
 #--- 3. changeparams contains all corrs, even if zero value
 #--- Both Numeric + Numpy should work
 
-import sys,os,time,datetime,string
-ver=sys.version; print "Using Python",string.split(ver)[0]
+import string
+import datetime
+import time
+import os
+
+import numpy as np
+from numpy import dot as matrixmultiply
+from numpy.linalg import pinv as  generalized_inverse
+
+default = 1
 
 
-#import Numeric as npy
-from metaclass import *
-try:
-	from Numeric import *
-except:
-	from numpy import *
-
-
-default=1
-from GenMatrix import *
-#from metaclass import twiss
-from AllLists import *
-
-
-def wrtparOLD(dfam,app=0,path="./"):
-    if (app == 0):mode='w'
-    if (app == 1):mode='a'
+def wrtparOLD(dfam, app=0, path="./"):
+    if (app == 0):
+        mode = 'w'
+    if (app == 1):
+        mode = 'a'
     a = datetime.datetime.fromtimestamp(time.time())
-    #dfam=[(k,v) for (k,v) in dfam.items()]
-    g = open (path+'changeparameters', mode);i=0
+    g = open (path+'changeparameters', mode)
     f = open (path+'changeparameters.tfs', mode)
-    print >>f, "@", "APP", "%le", app
-    print >>f, "@", "PATH","%s", path
-    print >>f, "@", "DATE", "%s", a.ctime()
-    print >>f, "*", "NAME    ", "    DELTA"
-    print >>f, "$", "%s    ",       "    %le"
-    if default==0: items=sorted(dfam.iteritems(),key=lambda (k,v):\
-                                (npy.abs(v),k),reverse=True)
-    if default==1: items=[(k,v) for (k, v) in dfam.items()]
+    print >> f, "@", "APP", "%le", app
+    print >> f, "@", "PATH", "%s", path
+    print >> f, "@", "DATE", "%s", a.ctime()
+    print >> f, "*", "NAME    ", "    DELTA"
+    print >> f, "$", "%s    ", "    %le"
+    if default == 0:
+        items = sorted(dfam.iteritems(), key=lambda (k,v):(np.abs(v),k), reverse=True)
+    if default == 1:
+        items = [(k,v) for (k, v) in dfam.items()]
     for k,v in items:
-        g.write('%12s = %12s'%(k,k)+' +  '+\
-                '( %e )'%(v)+';\n')
-        f.write('%12s   %e'%(k, v)+'\n'); i+=1
-    g.close();f.close()
-    return
+        g.write('%12s = %12s'%(k,k)+' +  '+'( %e )'%(v)+';\n')
+        f.write('%12s   %e'%(k, v)+'\n')
+    g.close()
+    f.close()
+
 
 def wrtpar(corr, dfam,app=0,path="./"):
-    if (app == 0):mode='w'
-    if (app == 1):mode='a'
+    if (app == 0):
+        mode = 'w'
+    if (app == 1):
+        mode = 'a'
     a = datetime.datetime.fromtimestamp(time.time())
-    g = open (path+'changeparameters', mode);i=0
-    f = open (path+'changeparameters.tfs', mode)
+    g = open (os.path.join(path, "changeparameters"), mode)
+    f = open (os.path.join(path, "changeparameters.tfs"), mode)
     #--- note minus sign for change.tfs to do corr
     print >>f, "@", "APP", "%le", app
     print >>f, "@", "PATH","%s", path
@@ -60,21 +58,21 @@ def wrtpar(corr, dfam,app=0,path="./"):
         if k in dfam.keys():
             g.write('%12s = %12s'%(k,k)+' +  '+\
                     '( %e )'%(dfam[k])+';\n')
-            f.write('%12s   %e'%(k, -dfam[k])+'\n'); i+=1
+            f.write('%12s   %e'%(k, -dfam[k])+'\n')
         else:
             #g.write('%12s = %12s'%(k,k)+' +  '+\
             #        '( %e )'%(0.0)+';\n')
-            f.write('%12s   %e'%(k, 0.0)+'\n'); i+=1
+            f.write('%12s   %e'%(k, 0.0)+'\n')
     g.close();f.close()
     return
 
 def calcRMS(R):
-    rms=npy.sqrt(npy.sum(R**2)/len(R))
-    ptp=npy.max(R)-npy.min(R)
+    rms=np.sqrt(np.sum(R**2)/len(R))
+    ptp=np.max(R)-np.min(R)
     return rms, ptp
 
 def calcRMSNumeric(R):
-    rms=sqrt(sum(R**2)/len(R))
+    rms = np.sqrt(sum(R**2)/len(R))
     ptp=max(R)-min(R)
     return rms, ptp
 
@@ -83,18 +81,18 @@ def sortDict(adict):
     for item in list: print item[0],":",item[1]
 
 def bCorr(X,Y,DX, beat_input, cut=0.001,app=0,path="./"):
-    R=transpose(beat_input.sensitivity_matrix)
+    R = np.transpose(beat_input.sensitivity_matrix)
     b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
     corr=beat_input.varslist
-    m,n=npy.shape(R)
+    m,n=np.shape(R)
     if len(b)==m and len(corr)==n:
-        rms,ptop=calcRMS(b); inva=npy.linalg.pinv(R)
+        rms,ptop=calcRMS(b); inva=np.linalg.pinv(R)
         print "initial {RMS, Peak}: {", '%e' %(rms),',', \
               '%e' %(ptop), "} mm"
         print "finding best over",n,"correctors"
         for i in range(n):
-            dStren=npy.dot(inva[i,:],b)
-            bvec=b-npy.dot(R[:,i],dStren)
+            dStren=np.dot(inva[i,:],b)
+            bvec=b-np.dot(R[:,i],dStren)
             rm,ptp=calcRMS(bvec)
             if rm < rms: rms=rm; rbest=i; rStren=dStren
             if ptp < ptop: ptop=ptp; pbest=i; pStren=dStren
@@ -110,17 +108,17 @@ def bCorr(X,Y,DX, beat_input, cut=0.001,app=0,path="./"):
     return
 
 def bCorrNumeric(X,Y,DX, beat_input, cut=0.001,app=0,path="./"):
-    R=npy.transpose(beat_input.sensitivity_matrix)
+    R=np.transpose(beat_input.sensitivity_matrix)
     b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
-    corr=beat_input.varslist; m,n=npy.shape(R)
+    corr=beat_input.varslist; m,n=np.shape(R)
     if len(b)==m and len(corr)==n:
-        rms,ptop=calcRMSNumeric(b); inva=generalized_inverse(R,cut)
+        rms,ptop=calcRMSNumeric(b); inva = generalized_inverse(R,cut)
         print "initial {RMS, Peak}: {", '%e' %(rms),',', \
               '%e' %(ptop), "} mm"
         print "finding best over",n,"correctors"
         for i in range(n):
-            dStren=npy.matrixmultiply(inva[i,:],b)
-            bvec=b-npy.matrixmultiply(R[:,i],dStren)
+            dStren=matrixmultiply(inva[i,:],b)
+            bvec=b-matrixmultiply(R[:,i],dStren)
             rm,ptp=calcRMSNumeric(bvec)
             if rm < rms: rms=rm; rbest=i; rStren=dStren
             if ptp < ptop: ptop=ptp; pbest=i; pStren=dStren
@@ -136,17 +134,17 @@ def bCorrNumeric(X,Y,DX, beat_input, cut=0.001,app=0,path="./"):
     return
 
 def bNCorr(X,Y,DX, beat_input, cut=0.001,ncorr=3, app=0, tol=1e-9,path="./"):
-    R=transpose(beat_input.sensitivity_matrix);m,n=npy.shape(R)
+    R = np.transpose(beat_input.sensitivity_matrix);m,n=np.shape(R)
     b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
     corr=beat_input.varslist;
-    inva=npy.linalg.pinv(R,cut);RHO2={};rmss,ptopp=calcRMS(b)
+    inva=np.linalg.pinv(R,cut);RHO2={};rmss,ptopp=calcRMS(b)
     for ITER in range(ncorr):
         for j in range(n):
             if j not in RHO2:
                 RHO=[k for k in RHO2.keys()];RHO.append(j)
-                RR=npy.take(R,RHO,1);invaa=npy.take(inva,RHO,0)
-                dStren=npy.dot(invaa,b)
-                bvec=b-npy.dot(RR,dStren)
+                RR=np.take(R,RHO,1);invaa=np.take(inva,RHO,0)
+                dStren = matrixmultiply(invaa,b)
+                bvec = b - matrixmultiply(RR,dStren)
                 rm,ptp=calcRMS(bvec)
                 if rm < rmss:
                     rmss=rm; ptopp=ptp; rbest=j; rStren=dStren
@@ -162,21 +160,21 @@ def bNCorr(X,Y,DX, beat_input, cut=0.001,ncorr=3, app=0, tol=1e-9,path="./"):
     return RHO3
 
 def itrSVD(X,Y,DX,beat_input, cut=0.001, iter=1, app=0, tol=1e-9,path="./"):
-    R=transpose(beat_input.sensitivity_matrix);m,n=npy.shape(R)
+    R = np.transpose(beat_input.sensitivity_matrix);m,n=np.shape(R)
     b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
     corr=beat_input.varslist;inva= generalized_inverse(R,cut);
-    rmss,ptopp=calcRMSNumeric(b);RHO2={};dStren=zeros(len(corr))
+    rmss,ptopp=calcRMSNumeric(b);RHO2={};dStren=np.zeros(len(corr))
     print 'Initial Phase-Beat:', '{RMS,PK2PK}',rmss,ptopp
     for ITER in range(iter):
-        dStren=dStren+npy.matrixmultiply(inva,b)
-        bvec=b-npy.matrixmultiply(R,dStren)
+        dStren = dStren + matrixmultiply(inva,b)
+        bvec = b - matrixmultiply(R,dStren)
         rm,ptp=calcRMSNumeric(bvec); print 'ITER',iter, '{RMS,PK2PK}',rm,ptp
     for j in range(len(corr)): RHO2[corr[j]]=dStren[j]
     wrtpar(corr,RHO2,app,path)
 
-def bNCorrNumeric(X,Y,DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9,path="./"):
-    R=transpose(beat_input.sensitivity_matrix);m,n=npy.shape(R)
-    b=beat_input.computevectorEXP(X,Y,DX)-beat_input.zerovector
+def bNCorrNumeric(X,Y,DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9,path="./", beta_x=None, beta_y=None):
+    R = np.transpose(beat_input.sensitivity_matrix);m,n=np.shape(R)
+    b = beat_input.computevectorEXP(X,Y,DX, beta_x, beta_y)-beat_input.zerovector
     corr=beat_input.varslist;
     # "-" sign added, to be verified by Ram (1-Aug-2008)
     #-- sign removed by Ram, look comment below in loop(Nov 27, 2009)
@@ -187,10 +185,10 @@ def bNCorrNumeric(X,Y,DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9,path="
         for j in range(n):
             if j not in RHO2:
                 RHO=[k for k in RHO2.keys()];RHO.append(j)
-                RR=npy.take(R,RHO,1);invaa=npy.take(inva,RHO,0)
-                dStren=npy.matrixmultiply(invaa,b)
+                RR=np.take(R,RHO,1);invaa=np.take(inva,RHO,0)
+                dStren = matrixmultiply(invaa,b)
                 #--- calculate residual due to 1..nth corrector
-                bvec=b-npy.matrixmultiply(RR,dStren)
+                bvec = b - matrixmultiply(RR,dStren)
                 rm,ptp=calcRMSNumeric(bvec)
                 if rm < rmss:
                     rmss=rm; ptopp=ptp; rbest=j; rStren=dStren
@@ -202,11 +200,12 @@ def bNCorrNumeric(X,Y,DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9,path="
             print "stopped after",ITER, "correctors";break
     itr=0;RHO3={} #-- make dict RHO3={corr:strength,...}
     for j in RHO2: RHO3[corr[j]]=rStren[itr];itr+=1
-    print '\n',sortDict(RHO3); wrtpar(corr,RHO3,app,path)
+    print '\n',sortDict(RHO3)
+    wrtpar(corr,RHO3,app,path)
     return RHO3
 
 def bNCorrNumericSim(a, beat_input, cut=0.1,ncorr=3, app=0, tol=1e-9,path="./"):
-    R=transpose(beat_input.sensitivity_matrix);m,n=npy.shape(R)
+    R = np.transpose(beat_input.sensitivity_matrix);m,n=np.shape(R)
     b=beat_input.computevector(a)-beat_input.zerovector
     corr=beat_input.varslist;
     inva=generalized_inverse(R,cut);RHO2={};rmss,ptopp=calcRMSNumeric(b)
@@ -214,9 +213,9 @@ def bNCorrNumericSim(a, beat_input, cut=0.1,ncorr=3, app=0, tol=1e-9,path="./"):
         for j in range(n):
             if j not in RHO2:
                 RHO=[k for k in RHO2.keys()];RHO.append(j)
-                RR=npy.take(R,RHO,1);invaa=npy.take(inva,RHO,0)
-                dStren=npy.matrixmultiply(invaa,b)
-                bvec=b-npy.matrixmultiply(RR,dStren)
+                RR=np.take(R,RHO,1);invaa=np.take(inva,RHO,0)
+                dStren = matrixmultiply(invaa,b)
+                bvec = b - matrixmultiply(RR,dStren)
                 rm,ptp=calcRMSNumeric(bvec)
                 if rm < rmss:
                     rmss=rm; ptopp=ptp; rbest=j; rStren=dStren
@@ -228,7 +227,8 @@ def bNCorrNumericSim(a, beat_input, cut=0.1,ncorr=3, app=0, tol=1e-9,path="./"):
             print "stopped after",ITER, "correctors";break
     itr=0;RHO3={} #-- make dict RHO3={corr:strength,...}
     for j in RHO2: RHO3[corr[j]]=rStren[itr];itr+=1
-    print RHO3, wrtpar(corr,RHO3,app,path)
+    print RHO3,
+    wrtpar(corr,RHO3,app,path)
     return RHO3
 
 

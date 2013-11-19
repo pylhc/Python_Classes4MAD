@@ -7,9 +7,6 @@ from numpy.linalg import pinv as  generalized_inverse
 from numpy import dot as matrixmultiply
 
 
-
-
-
 def MakeList(x, m):
     intersected_names = []
     num_of_removed_bpms = 0
@@ -77,12 +74,9 @@ def writeparams(deltafamilie, variables, app=0, path="./"):
     print >> f, "@", "DATE", "%s", a.ctime()
     print >> f, "*", "NAME", "DELTA"
     print >> f, "$", "%s", "%le"
-    i = 0
-    print len(variables), len(deltafamilie)
-    for var in variables:
+    for i, var in enumerate(variables):
         g.write(var+' = '+ var+' + ( '+str(deltafamilie[i])+' );\n')
         f.write(var+'   '+str(deltafamilie[i])+'\n')
-        i += 1
     g.close()
     f.close()
 
@@ -176,7 +170,7 @@ def correctbeat(a, beat_input, cut=0.01, app=0, path="./"):
     writeparams(delta, beat_input.varslist, app,  path=path)
 
 
-def correctbeatEXP(x, y, dx, beat_input, cut=0.01, app=0, path="./",xbet=[],ybet=[]):
+def correctbeatEXP(x, y, dx, beat_input, cut=0.01, app=0, path="./", xbet=[], ybet=[]):
     R =   np.transpose(beat_input.sensitivity_matrix)
     vector = beat_input.computevectorEXP(x, y, dx, xbet, ybet)
     wg = beat_input.wg
@@ -207,7 +201,7 @@ class beat_input:
         self.sensitivity_matrix = []
 
 
-    def computevectorEXP(self, x, y, dx, xbet=[], ybet=[]):
+    def computevectorEXP(self, x, y, dx, xbet=None, ybet=None):
         phix = []
         phiy = []
         betx = []
@@ -223,10 +217,12 @@ class beat_input:
             phiy.append(y.PHASEY[y.indx[bpm1]])
         for b in self.displist:
             disp.append(dx.NDX[dx.indx[b]])
-        for b in self.betaxlist:
-            betx.append(xbet.BETX[xbet.indx[b]])
-        for b in self.betaylist:
-            bety.append(ybet.BETY[ybet.indx[b]])
+        if xbet is not None:
+            for b in self.betaxlist:
+                betx.append(xbet.BETX[xbet.indx[b]])
+        if ybet is not None:
+            for b in self.betaylist:
+                bety.append(ybet.BETY[ybet.indx[b]])
 
         return np.array(np.concatenate([phix, phiy, betx, bety, disp, [x.Q1], [y.Q2]]))
 
