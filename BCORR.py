@@ -1,8 +1,18 @@
-#--- set of python routines:
-#--- 1. best corrector for beta-beat (July 28, 2008)
-#--- 2. Best N Corrector ~ like micado
-#--- 3. changeparams contains all corrs, even if zero value
-#--- Both Numeric + Numpy should work
+r"""
+.. module: Python_Classes4MAD.BCORR
+
+Created on ??
+
+set of python routines:
+ 1. best corrector for beta-beat (July 28, 2008)
+ 2. Best N Corrector ~ like micado
+ 3. changeparams contains all corrs, even if zero value
+
+Both Numeric + Numpy should work --> Not true anymore. Changed everything to numpy (vimaier)
+
+
+.. moduleauthor:: Unknown
+"""
 
 import datetime
 import time
@@ -33,8 +43,8 @@ def wrtparOLD(dfam, app=0, path="./"):
     if default == 1:
         items = [(k, v) for (k, v) in dfam.items()]
     for k, v in items:
-        g.write('%12s = %12s'%(k, k)+' +  '+'( %e )'%(v)+';\n')#TODO: one string format is enough(vimaier)
-        f.write('%12s   %e'%(k, v)+'\n')#TODO: one string format is enough(vimaier)
+        g.write("%12s = %12s + ( %e );\n" % (k, k, v))
+        f.write("%12s   %e\n" % (k, v))
     g.close()
     f.close()
 
@@ -47,7 +57,6 @@ def wrtpar(corr, dfam, app=0, path="./"):
     a = datetime.datetime.fromtimestamp(time.time())
     g = open( os.path.join(path, "changeparameters"), mode )
     f = open( os.path.join(path, "changeparameters.tfs"), mode )
-    #--- note minus sign for change.tfs to do corr
     print >> f, "@", "APP", "%le", app
     print >> f, "@", "PATH", "%s", path
     print >> f, "@", "DATE", "%s", a.ctime()
@@ -55,10 +64,11 @@ def wrtpar(corr, dfam, app=0, path="./"):
     print >> f, "$", "%s    ", "    %le"
     for k in corr:
         if k in dfam.keys():
-            g.write('%12s = %12s' % (k, k)+' +  '+'( %e )' % (dfam[k])+';\n')#TODO: one string format is enough(vimaier)
-            f.write('%12s   %e'%(k, -dfam[k])+'\n')#TODO: one string format is enough(vimaier)
+            g.write("%12s = %12s + ( %e );\n" % (k, k, dfam[k]))
+            #--- note minus sign for change.tfs to do corr
+            f.write("%12s   %e\n" % (k, -dfam[k]))
         else:
-            f.write('%12s   %e'%(k, 0.0)+'\n')#TODO: one string format is enough(vimaier)
+            f.write("%12s   %e\n" % (k, 0.0))
     g.close()
     f.close()
 
@@ -85,7 +95,7 @@ def bCorr(X, Y, DX, beat_input, cut=0.001, app=0, path="./"):
     if len(b) == m and len(corr) == n:
         rms, ptop = calcRMS(b)
         inva = np.linalg.pinv(R)
-        print "initial {RMS, Peak}: {", '%e' % (rms), ',', '%e' % (ptop), "} mm" #TODO: one string format is enough(vimaier)
+        print "initial {RMS, Peak}: { %e , %e } mm" % (rms, ptop)
         print "finding best over", n, "correctors"
         for i in range(n):
             dStren = np.dot(inva[i, :], b)
@@ -99,7 +109,7 @@ def bCorr(X, Y, DX, beat_input, cut=0.001, app=0, path="./"):
                 ptop = ptp
                 pbest = i
                 pStren = dStren
-        print "final {RMS, Peak}: {", '%e' % (rms), ',', '%e' % (ptop), "}" #TODO: one string format is enough(vimaier)
+        print "final {RMS, Peak}: { %e , %e }" % (rms, ptop)
         if rbest == pbest:
             print "best corr:", corr[rbest], '%e'% (rStren), "1/m"
         else:
@@ -117,7 +127,7 @@ def bCorrNumeric(X, Y, DX, beat_input, cut=0.001, app=0, path="./"):
     if len(b) == m and len(corr) == n:
         rms, ptop = calcRMSNumeric(b)
         inva = generalized_inverse(R, cut)
-        print "initial {RMS, Peak}: {", '%e' % (rms), ',', '%e' % (ptop), "} mm"
+        print "initial {RMS, Peak}: { %e , %e } mm" % (rms, ptop)
         print "finding best over", n, "correctors"
         for i in range(n):
             dStren = matrixmultiply(inva[i, :], b)
@@ -131,7 +141,7 @@ def bCorrNumeric(X, Y, DX, beat_input, cut=0.001, app=0, path="./"):
                 ptop = ptp
                 pbest = i
                 pStren = dStren
-        print "final {RMS, Peak}: {", '%e' % (rms), ',', '%e' % (ptop), "}"
+        print "final {RMS, Peak}: { %e , %e }" % (rms, ptop)
         if rbest == pbest:
             print "best corr:", corr[rbest], '%e' % (rStren), "1/m"
         else:
@@ -201,6 +211,7 @@ def itrSVD(X, Y, DX, beat_input, cut=0.001, num_iter=1, app=0, tol=1e-9, path=".
     for j in range(len(corr)):
         RHO2[corr[j]] = dStren[j]
     wrtpar(corr, RHO2, app, path)
+
 
 def bNCorrNumeric(X, Y, DX, beat_input, cut=0.001, ncorr=3, app=0, tol=1e-9, path="./", beta_x=None, beta_y=None):
     R = np.transpose(beat_input.sensitivity_matrix)

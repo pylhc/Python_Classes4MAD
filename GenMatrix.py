@@ -250,7 +250,6 @@ class beat_input:
 
     def computeSensitivityMatrix(self, x):
         self.zerovector = self.computevector(x['0'])
-        self.sensitivity_matrix = []
         incr = x['incr'][0]  # BUG! need to read it from FullResponse!
 
         nph = len(self.phasexlist) + len(self.phaseylist)
