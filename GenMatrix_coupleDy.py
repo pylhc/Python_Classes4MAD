@@ -130,9 +130,12 @@ class CoupleInput:
         #ncouple=4*len(self.couplelist)
         self.normvector = np.array(np.concatenate([np.ones(len(self.couplelist)),np.ones(len(self.couplelist)),np.ones(len(self.couplelist)),np.ones(len(self.couplelist)),np.ones(len(self.dispylist)) ]))*1.0
         for var in self.varslist:
-            vector=self.computevector(x[var], x[var])
-            self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
-
+            if var in x:
+                vector=self.computevector(x[var], x[var])
+                self.sensitivity_matrix.append((vector-self.zerovector)/self.normvector/incr)
+            else:
+                raise KeyError("Variable "+var+" is not in Fullresponse.")
+                
         self.sensitivity_matrix = np.array(self.sensitivity_matrix)
         
         return self.sensitivity_matrix
