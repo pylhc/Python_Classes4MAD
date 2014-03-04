@@ -137,7 +137,7 @@ class twiss:
             # Table-entry-line
                 values = split_line
                 for j in range(0,len(values)):
-                    if ("%hd" in alltypes[j + 1]):
+                    if ("%hd" in alltypes[j + 1] or "%d" in alltypes[j + 1] ):
                         getattr(self, alllabels[j + 1]).append(int(values[j]))
                     if ("%le" in alltypes[j + 1]):
                         getattr(self, alllabels[j + 1]).append(float(values[j]))
