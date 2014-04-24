@@ -395,12 +395,17 @@ class twiss:
             self.f1001.append(((C[0] + C[3]) * 1j + (C[1] - C[2])) / 4 / gamma)
             self.f1010.append(((C[0] - C[3]) * 1j + (-C[1] - C[2])) / 4 / gamma)
 
-        self.F1001R = numpy.array(self.f1001).real
-        self.F1001I = numpy.array(self.f1001).imag
-        self.F1010R = numpy.array(self.f1010).real
-        self.F1010I = numpy.array(self.f1010).imag
-        self.F1001W = abs(self.f1001)
-        self.F1010W = abs(self.f1010)
+        # create numpy arrays of the two lists:
+        self.f1001NP=numpy.array(self.f1001)
+        self.f1010NP=numpy.array(self.f1010)
+
+        self.F1001R = self.f1001NP.real
+        self.F1001I = self.f1001NP.imag
+        self.F1010R = self.f1010NP.real
+        self.F1010I = self.f1010NP.imag
+
+        self.F1001W = abs(self.f1001NP)
+        self.F1010W = abs(self.f1010NP)
 
     def beatMatrix(self):
         '''
