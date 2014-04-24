@@ -75,6 +75,10 @@ class twiss:
                     self.indx[m.upper()] = self.indx[n]
             else:
                 print "skipped value from dictionary because not in NAME. value: ", n
+    def __repr__(self):
+        return "metaclass.twiss from file "+self.filename
+    def __str__(self):
+        return self.__repr__()
 
     def __getattr__(self,name):
         if name in self.keys:
