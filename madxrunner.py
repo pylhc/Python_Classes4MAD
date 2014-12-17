@@ -50,7 +50,7 @@ def runForInputFile(filepath, madxPath=None, stdout=None):
     return returnCode
 
 
-def runForInputString(stringInput, madxPath=None, stdout=None):
+def runForInputString(stringInput, madxPath=None, stdout=None, stderr=None):
     """
     Run MADX with the given string as input, returns the errorcode from MADX as int.
     Arguments:
@@ -64,7 +64,7 @@ def runForInputString(stringInput, madxPath=None, stdout=None):
     """
     if madxPath is None:
         madxPath = globalMadxPath
-    process = subprocess.Popen(madxPath, shell=False, stdin=subprocess.PIPE, stdout=stdout)
+    process = subprocess.Popen(madxPath, shell=False, stdin=subprocess.PIPE, stdout=stdout, stderr=stderr)
     process.communicate(stringInput)
     returnCode = process.wait()
     return returnCode
