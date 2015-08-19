@@ -204,12 +204,15 @@ class twiss:
         self.f1011 = []
         self.f4000 = []
         self.f2000 = []
+        self.f1001 = []
+        self.f1010 = []
         S = getattr(self, "S")
         MUX = getattr(self, "MUX")
         MUY = getattr(self, "MUY")
         Q1 = getattr(self, "Q1")
         Q2 = getattr(self, "Q2")
         K1L = getattr(self, "K1L")
+        K1SL = getattr(self, "K1SL")
         K2L = getattr(self, "K2L")
         K3L = getattr(self, "K3L")
         BETX = getattr(self, "BETX")
@@ -238,11 +241,20 @@ class twiss:
             dumm = -sum(K1L * BETX ** 1 * E ** (2 * I * 2 * PI * phix)) / 32.
             self.f2000.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
 
+            dumm = -sum(K1SL * (BETX ** 0.5) * (BETY ** 0.5) * E ** (I * 2 * PI * (phix - phiy))) / 4.
+            self.f1001.append(dumm / (1. - E ** (2 * PI * I * (Q1 - Q2))))
+
+            dumm = -sum(K1SL * (BETX ** 0.5) * (BETY ** 0.5) * E ** (I * 2 * PI * (phix + phiy))) / 4.
+            self.f1010.append(dumm / (1. - E ** (2 * PI * I * (Q1 + Q2))))
+
         self.f3000 = numpy.array(self.f3000)
         self.f2100 = numpy.array(self.f2100)
         self.f1020 = numpy.array(self.f1020)
         self.f1002 = numpy.array(self.f1002)
         self.f1011 = numpy.array(self.f1011)
+
+        self.f1001 = numpy.array(self.f1001)
+        self.f1010 = numpy.array(self.f1010)
 
         self.f0120 = numpy.conjugate(self.f1002)
         self.f0111 = numpy.conjugate(self.f1011)
@@ -364,7 +376,7 @@ class twiss:
         J = numpy.reshape(numpy.array([0, 1, -1, 0]), (2, 2))
         for j in range(0, len(S)):
             R = numpy.array([[R11[j], R12[j]], [R21[j], R22[j]]])
-            
+
             C = matrixmultiply(-J, matrixmultiply(numpy.transpose(R), J))
             C = (1 / numpy.sqrt(1 + determinant(R))) * C
 
@@ -380,7 +392,7 @@ class twiss:
             g22 = numpy.sqrt(BETY[j])
             Gb = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
             C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
-            gamma = 1 - determinant(C)
+            gamma = numpy.sqrt(1 - determinant(C))
             self.gamma.append(gamma)
             C = numpy.ravel(C)
             self.C.append(C)
