@@ -41,13 +41,14 @@ def parseout(file,sep=','):
 
 
 def toseconds(s):
-  try:
-    miliseconds=float(s.split(".")[1])
-  except:
-    print "Error with ",s, "in toseconds()"
-    sys.exit()
+  if "." in s:
+    mantissa=s.strip().split(".")[1]
+    ndigits=len(mantissa)
+    mantissa=float(mantissa)
+  else:
+    mantissa=0.
   tup=time.strptime(s.split(".")[0], "%Y-%m-%d %H:%M:%S")
-  return time.mktime(tup)+miliseconds/1000.
+  return time.mktime(tup)+mantissa/10.**ndigits
 
 
 def extract(t,d,t1,t2):
