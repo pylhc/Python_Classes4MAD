@@ -7,21 +7,30 @@ from numpy.linalg import pinv as  generalized_inverse
 from numpy import dot as matrixmultiply
 
 
-def MakeList(x, m):
+def MakeList(x, m, modelcut=0.1, errorcut=0.027):
     intersected_names = []
     num_of_removed_bpms = 0
     if x == []:
         return []
+    keys = x.__dict__.keys()
+    ndmdl = "NDXMDL"
+    STD = x.STDNDX
+    NDX = x.NDX
+    print "Number of x BPMs", len(x.NAME)
     for i in range(len(x.NAME)):
-        try:
-            m.indx[x.NAME[i].upper()]
-        except KeyError:
-            print "Not in Response:", x.NAME[i].upper()
-            num_of_removed_bpms += 1
+        ndm = x.__dict__[ndmdl][i]
+        if (STD[i] < errorcut and abs(NDX[i] - ndm) < modelcut):
+            try:
+                m.indx[x.NAME[i].upper()]
+            except KeyError:
+                print "Not in Response:", x.NAME[i].upper()
+                num_of_removed_bpms += 1
+            else:
+                intersected_names.append(x.NAME[i])
         else:
-            intersected_names.append(x.NAME[i])
+            num_of_removed_bpms += 1
     if num_of_removed_bpms > 0:
-        print "Warning: ", num_of_removed_bpms, "BPMs removed from data for not being in the model"
+        print "Warning: ", num_of_removed_bpms, "BPMs removed from data for not being in the model or having too large error"
     return intersected_names
 
 
