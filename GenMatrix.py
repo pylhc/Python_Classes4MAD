@@ -1,27 +1,69 @@
 
 import datetime
 import time
+import os
 
 import numpy as np
 from numpy.linalg import pinv as  generalized_inverse
 from numpy import dot as matrixmultiply
+import Python_Classes4MAD.metaclass as metaclass
 
-
-def MakeList(x, m):
+def MakeDispList(x, m, modelcut=0.1, errorcut=0.027):
     intersected_names = []
     num_of_removed_bpms = 0
     if x == []:
         return []
+    keys = x.__dict__.keys()
+    ndmdl = "NDXMDL"
+    STD = x.STDNDX
+    NDX = x.NDX
+    print "Number of x BPMs", len(x.NAME)
     for i in range(len(x.NAME)):
-        try:
-            m.indx[x.NAME[i].upper()]
-        except KeyError:
-            print "Not in Response:", x.NAME[i].upper()
-            num_of_removed_bpms += 1
+        ndm = x.__dict__[ndmdl][i]
+        if (STD[i] < errorcut and abs(NDX[i] - ndm) < modelcut):
+            try:
+                m.indx[x.NAME[i].upper()]
+            except KeyError:
+                print "Not in Response:", x.NAME[i].upper()
+                num_of_removed_bpms += 1
+            else:
+                intersected_names.append(x.NAME[i])
         else:
-            intersected_names.append(x.NAME[i])
+            num_of_removed_bpms += 1
     if num_of_removed_bpms > 0:
-        print "Warning: ", num_of_removed_bpms, "BPMs removed from data for not being in the model"
+        print "Warning: ", num_of_removed_bpms, "BPMs removed from data for not being in the model or having too large error"
+    return intersected_names
+
+def MakeBetaList(x, m, modelcut=0.1, errorcut=0.027):      #Beta-beating and its error RELATIVE as shown in GUI
+    intersected_names = []
+    num_of_removed_bpms = 0
+    keys = x.__dict__.keys()
+    if "BETY" in keys:
+        bmdl = "BETYMDL"
+        STD = x.STDBETY
+        ERR = x.ERRBETY
+        BET = x.BETY
+    else:
+        bmdl = "BETXMDL"
+        STD = x.STDBETX
+        ERR = x.ERRBETX
+        BET = x.BETX
+    print "Number of x BPMs", len(x.NAME)
+    for i in range(len(x.NAME)):
+        bm = x.__dict__[bmdl][i]
+        relerr = np.sqrt(STD[i]**2 + ERR[i]**2) / bm
+        if (relerr < errorcut and (abs(BET[i] - bm)/bm) < modelcut):
+            try:
+                m.indx[x.NAME[i].upper()]
+            except KeyError:
+                print "Not in Response:", x.NAME[i].upper()
+                num_of_removed_bpms += 1
+            else:
+                intersected_names.append(x.NAME[i])
+        else:
+            num_of_removed_bpms += 1
+    if num_of_removed_bpms > 0:
+        print "Warning: ", num_of_removed_bpms, "BPMs removed from data for not being in the model or having too large error"
     return intersected_names
 
 
@@ -61,12 +103,18 @@ def MakePairs(x, m, modelcut=0.1, errorcut=0.027):
 
 
 
-def writeparams(deltafamilie, variables, app=0, path="./"):
+def writeparams(deltafamilie, variables, accel_path, app=0, path="./"):
     if (app == 0):
         mode = 'w'
     if (app == 1):
         mode = 'a'
     a = datetime.datetime.fromtimestamp(time.time())
+    if accel_path[-5:] == "LHCB1":
+        path_B1tfs = os.path.join(accel_path, "varsKLvsK_B1.tfs")
+        twiss_kl = metaclass.twiss(path_B1tfs)
+    if accel_path[-5:] == "LHCB2":
+        path_B2tfs = os.path.join(accel_path, "varsKLvsK_B2.tfs")
+        twiss_kl = metaclass.twiss(path_B2tfs)
     g = open (path+'/changeparameters', mode)
     f = open (path+'/changeparameters.tfs', mode)
     print >> f, "@", "APP", "%le", app
@@ -75,8 +123,12 @@ def writeparams(deltafamilie, variables, app=0, path="./"):
     print >> f, "*", "NAME", "DELTA"
     print >> f, "$", "%s", "%le"
     for i, var in enumerate(variables):
-        g.write(var+' = '+ var+' + ( '+str(deltafamilie[i])+' );\n')
-        f.write(var+'   '+str(deltafamilie[i])+'\n')
+        if var[0]=="l":
+            g.write(var[1:]+' = '+ var[1:] +' + ( '+str((deltafamilie[i]/twiss_kl.LENGTH[twiss_kl.indx[var]]))+' );\n')
+            f.write(var[1:]+'   '+str((deltafamilie[i]/twiss_kl.LENGTH[twiss_kl.indx[var]]))+'\n')
+        else:    
+            g.write(var+' = '+ var+' + ( '+str(deltafamilie[i])+' );\n')
+            f.write(var+'   '+str(deltafamilie[i])+'\n')
     g.close()
     f.close()
 
@@ -173,21 +225,30 @@ def correctbeat(a, beat_input, cut=0.01, app=0, path="./"):
 def correctbeatEXP(x, y, dx, beat_input, cut=0.01, app=0, path="./", xbet=[], ybet=[]):
     R =   np.transpose(beat_input.sensitivity_matrix)
     vector = beat_input.computevectorEXP(x, y, dx, xbet, ybet)
-    wg = beat_input.wg
-    weisvec = np.array(np.concatenate([np.sqrt(wg[0])*np.ones(len(beat_input.phasexlist)),
+    errwg = beat_input.errwg
+    if errwg == 1:
+        weisvec = beat_input.computeweightvectorEXP(x, y, dx, xbet, ybet)
+    else:
+        wg = beat_input.wg
+        print wg[4]
+        weisvec = np.array(np.concatenate([np.sqrt(wg[0])*np.ones(len(beat_input.phasexlist)),
 							            np.sqrt(wg[1])*np.ones(len(beat_input.phaseylist)),
 							            np.sqrt(wg[2])*np.ones(len(beat_input.betaxlist)),
 							            np.sqrt(wg[3])*np.ones(len(beat_input.betaylist)),
 							            np.sqrt(wg[4])*np.ones(len(beat_input.displist)),
 							            np.sqrt(wg[5])*np.ones(2)]))
+
     Rnew = np.transpose(np.transpose(R)*weisvec)
-    delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)/beat_input.normvector)
-    writeparams(delta, beat_input.varslist, app, path)
+    if errwg == 1:
+        delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)*weisvec/beat_input.normvector)
+    else:
+        delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)/beat_input.normvector)
+    writeparams(delta, beat_input.varslist, beat_input.accel_path, app, path)
     return [delta, beat_input.varslist]
 
 
 class beat_input:
-    def __init__(self, varslist, phasexlist=[], phaseylist=[], betaxlist=[], betaylist=[], displist=[], wg=[1,1,1,1,1,10]):
+    def __init__(self, varslist, accel_path, phasexlist=[], phaseylist=[], betaxlist=[], betaylist=[], displist=[], wg=[1,1,1,1,1,10], errwg = 1):
         self.varslist = varslist
         self.phasexlist = phasexlist
         self.phaseylist = phaseylist
@@ -196,9 +257,40 @@ class beat_input:
         print "Length at entry level of beta ", len(self.betaxlist), len(self.phasexlist)
         self.displist = displist
         self.wg = wg
+        self.errwg = errwg
+        self.accel_path = accel_path
         self.zerovector = []
         self.normvector = []
         self.sensitivity_matrix = []
+    
+    def computeweightvectorEXP(self, x, y, dx, xbet=None, ybet=None):
+        phix = []
+        phiy = []
+        betx = []
+        bety = []
+        disp = []
+        tune = []
+        wg = self.wg
+        print "Error weighed vector used"
+        for ph in self.phasexlist:
+            bpm1 = ph.split()[0]
+            phix.append(wg[0] / x.STDPHX[x.indx[bpm1]])
+
+        for ph in self.phaseylist:
+            bpm1 = ph.split()[0]
+            phiy.append(wg[1] / y.STDPHY[y.indx[bpm1]])
+        for b in self.displist:
+            disp.append(wg[4] / dx.STDNDX[dx.indx[b]])
+        if xbet is not None:
+            for b in self.betaxlist:
+                betx.append(wg[2] * xbet.BETXMDL[xbet.indx[b]] / np.sqrt(xbet.STDBETX[xbet.indx[b]]**2 + xbet.ERRBETX[xbet.indx[b]]**2))
+        if ybet is not None:
+            for b in self.betaylist:
+                bety.append(wg[3] * ybet.BETYMDL[ybet.indx[b]] / np.sqrt(ybet.STDBETY[ybet.indx[b]]**2 + ybet.ERRBETY[ybet.indx[b]]**2))
+        tune.append(wg[5]/0.001)  #Hardcoded precision of tunes, do we have the proper error somewhere?
+        tune.append(wg[5]/0.001)
+
+        return np.array(np.concatenate([phix, phiy, betx, bety, disp, tune]))
 
 
     def computevectorEXP(self, x, y, dx, xbet=None, ybet=None):
@@ -250,7 +342,10 @@ class beat_input:
 
     def computeSensitivityMatrix(self, x):
         self.zerovector = self.computevector(x['0'])
-        incr = x['incr'][0]  # BUG! need to read it from FullResponse!
+        if "incr_dict" in x:
+            incr_dict = x["incr_dict"]
+        else:
+            incr = x['incr'][0]
 
         nph = len(self.phasexlist) + len(self.phaseylist)
         nbet = len(self.betaxlist) + len(self.betaylist)
@@ -258,6 +353,8 @@ class beat_input:
         ndisp = len(self.displist)
         self.normvector = np.array(np.concatenate([np.ones(len(self.phasexlist)), np.ones(len(self.phaseylist)), self.zerovector[nph:nph+nbet], np.ones(ndisp+2)]))*1.0  #To take dbeta/beta later
         for var in self.varslist:
+            if "incr_dict" in x:
+                incr = incr_dict[var]
             vector = self.computevector(x[var])
             self.sensitivity_matrix.append( (vector-self.zerovector)/self.normvector/incr )
         self.sensitivity_matrix = np.array(self.sensitivity_matrix)
