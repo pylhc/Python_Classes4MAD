@@ -230,19 +230,16 @@ def correctbeatEXP(x, y, dx, beat_input, cut=0.01, app=0, path="./", xbet=[], yb
         weisvec = beat_input.computeweightvectorEXP(x, y, dx, xbet, ybet)
     else:
         wg = beat_input.wg
-        print wg[4]
-        weisvec = np.array(np.concatenate([np.sqrt(wg[0])*np.ones(len(beat_input.phasexlist)),
-							            np.sqrt(wg[1])*np.ones(len(beat_input.phaseylist)),
-							            np.sqrt(wg[2])*np.ones(len(beat_input.betaxlist)),
-							            np.sqrt(wg[3])*np.ones(len(beat_input.betaylist)),
-							            np.sqrt(wg[4])*np.ones(len(beat_input.displist)),
-							            np.sqrt(wg[5])*np.ones(2)]))
+        weisvec = np.array(np.concatenate([wg[0]*np.ones(len(beat_input.phasexlist)),
+							            wg[1]*np.ones(len(beat_input.phaseylist)),
+							            wg[2]*np.ones(len(beat_input.betaxlist)),
+							            wg[3]*np.ones(len(beat_input.betaylist)),
+							            wg[4]*np.ones(len(beat_input.displist)),
+							            wg[5]*np.ones(2)]))
 
     Rnew = np.transpose(np.transpose(R)*weisvec)
-    if errwg == 1:
-        delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)*weisvec/beat_input.normvector)
-    else:
-        delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)/beat_input.normvector)
+    delta = -matrixmultiply(generalized_inverse(Rnew, cut), (vector-beat_input.zerovector)*weisvec/beat_input.normvector)
+    
     writeparams(delta, beat_input.varslist, beat_input.accel_path, app, path)
     return [delta, beat_input.varslist]
 
