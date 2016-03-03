@@ -40,14 +40,24 @@ def MakeBetaList(x, m, modelcut=0.1, errorcut=0.027):      #Beta-beating and its
     keys = x.__dict__.keys()
     if "BETY" in keys:
         bmdl = "BETYMDL"
-        STD = x.STDBETY
-        ERR = x.ERRBETY
+        
         BET = x.BETY
+	if hasattr(x, 'ERRBETY'):
+            ERR = x.ERRBETY
+	    STD = x.STDBETY
+	else:
+	    ERR = np.zeros(len(BET))
+	    STD = x.BETYSTD
     else:
         bmdl = "BETXMDL"
-        STD = x.STDBETX
-        ERR = x.ERRBETX
+        
         BET = x.BETX
+	if hasattr(x, 'ERRBETX'):
+            ERR = x.ERRBETX
+	    STD = x.STDBETX
+	else:
+	    STD = x.BETXSTD
+	    ERR = np.zeros(len(BET))
     print "Number of x BPMs", len(x.NAME)
     for i in range(len(x.NAME)):
         bm = x.__dict__[bmdl][i]
