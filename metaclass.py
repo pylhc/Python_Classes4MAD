@@ -118,7 +118,7 @@ class twiss:
             elif ("@ " in line and "s" in split_line[2]):
             # String-Descriptor-line
                 label = split_line[1].replace(":", "")
-                setattr(self, label, split_line[3].replace("\"", ""))
+                setattr(self, label, " ".join(split_line[3:]).replace("\"", ""))
                 is_line_parsed = True
                 
             if ("* " in line or "*\t" in line):

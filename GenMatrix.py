@@ -40,24 +40,29 @@ def MakeBetaList(x, m, modelcut=0.1, errorcut=0.027):      #Beta-beating and its
     keys = x.__dict__.keys()
     if "BETY" in keys:
         bmdl = "BETYMDL"
-        
         BET = x.BETY
-	if hasattr(x, 'ERRBETY'):
+        if hasattr(x, 'ERRBETY'):
             ERR = x.ERRBETY
-	    STD = x.STDBETY
-	else:
-	    ERR = np.zeros(len(BET))
-	    STD = x.BETYSTD
+            if hasattr(x, "STDBETY"):
+                STD = x.STDBETY
+            else:
+                STD = np.zeros(len(BET))
+        else:
+            ERR = np.zeros(len(BET))
+            STD = x.BETYSTD
     else:
         bmdl = "BETXMDL"
-        
         BET = x.BETX
-	if hasattr(x, 'ERRBETX'):
+        if hasattr(x, 'ERRBETX'):
             ERR = x.ERRBETX
-	    STD = x.STDBETX
-	else:
-	    STD = x.BETXSTD
-	    ERR = np.zeros(len(BET))
+            if hasattr(x, "STDBETX"):
+                STD = x.STDBETX
+            else:
+                STD = np.zeros(len(BET))
+        else:
+            STD = x.BETXSTD
+            ERR = np.zeros(len(BET))
+
     print "Number of x BPMs", len(x.NAME)
     for i in range(len(x.NAME)):
         bm = x.__dict__[bmdl][i]
@@ -290,10 +295,16 @@ class beat_input:
             disp.append(wg[4] / dx.STDNDX[dx.indx[b]])
         if xbet is not None:
             for b in self.betaxlist:
-                betx.append(wg[2] * xbet.BETXMDL[xbet.indx[b]] / np.sqrt(xbet.STDBETX[xbet.indx[b]]**2 + xbet.ERRBETX[xbet.indx[b]]**2))
+                try:
+                    betx.append(wg[2] * xbet.BETXMDL[xbet.indx[b]] / np.sqrt(xbet.STDBETX[xbet.indx[b]]**2 + xbet.ERRBETX[xbet.indx[b]]**2))
+                except AttributeError:
+                    betx.append(wg[2] * xbet.BETXMDL[xbet.indx[b]] / xbet.ERRBETX[xbet.indx[b]])
         if ybet is not None:
             for b in self.betaylist:
-                bety.append(wg[3] * ybet.BETYMDL[ybet.indx[b]] / np.sqrt(ybet.STDBETY[ybet.indx[b]]**2 + ybet.ERRBETY[ybet.indx[b]]**2))
+                try:
+                    bety.append(wg[3] * ybet.BETYMDL[ybet.indx[b]] / np.sqrt(ybet.STDBETY[ybet.indx[b]]**2 + ybet.ERRBETY[ybet.indx[b]]**2))
+                except AttributeError:
+                    bety.append(wg[3] * ybet.BETYMDL[ybet.indx[b]] / ybet.ERRBETY[ybet.indx[b]])   
         tune.append(wg[5]/0.001)  #Hardcoded precision of tunes, do we have the proper error somewhere?
         tune.append(wg[5]/0.001)
 
