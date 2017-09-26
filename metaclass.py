@@ -55,6 +55,7 @@ import numpy
 from numpy import dot as matrixmultiply
 from numpy.linalg import inv as inverse
 from numpy.linalg import det as determinant
+from math import factorial
 
 
 import sys
@@ -141,6 +142,8 @@ class twiss:
                         getattr(self, alllabels[j + 1]).append(int(values[j]))
                     if ("%le" in alltypes[j + 1]):
                         getattr(self, alllabels[j + 1]).append(float(values[j]))
+                    if ("%im" in alltypes[j + 1]):
+                        getattr(self, alllabels[j + 1]).append(complex(values[j]))
                     if ("s" in alltypes[j+1]):
                         getattr(self, alllabels[j + 1]).append(values[j].replace("\"", ""))
                         if "NAME" == alllabels[j + 1]:
@@ -196,23 +199,29 @@ class twiss:
         '''
          Add f terms to the twiss table
         '''
+
         self.f3000 = []
         self.f2100 = []
         self.f1020 = []
         self.f1002 = []
         self.f20001 = []
         self.f1011 = []
-        self.f4000 = []
         self.f2000 = []
-        self.f1001 = []
-        self.f1010 = []
+        self.f4000 = []
+        self.f3100 = []
+        self.f2020 = []
+        self.f1102 = []
+        self.f2011 = []
+        self.f2002 = []
+        self.f0031 = []
+        self.f0040 = []
+
         S = getattr(self, "S")
         MUX = getattr(self, "MUX")
         MUY = getattr(self, "MUY")
         Q1 = getattr(self, "Q1")
         Q2 = getattr(self, "Q2")
         K1L = getattr(self, "K1L")
-        K1SL = getattr(self, "K1SL")
         K2L = getattr(self, "K2L")
         K3L = getattr(self, "K3L")
         BETX = getattr(self, "BETX")
@@ -236,25 +245,38 @@ class twiss:
             self.f20001.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
             dumm = sum(K2L * BETX ** 0.5 * BETY * E ** (I * 2 * PI * (phix))) / 4.
             self.f1011.append(dumm / (1. - E ** (I * 2 * PI * Q1)))
-            dumm = -sum(K3L * BETX ** 2 * E ** (4 * I * 2 * PI * (phix))) / 384.
-            self.f4000.append(dumm / (1. - E ** (4 * I * 2 * PI * Q1)))
             dumm = -sum(K1L * BETX ** 1 * E ** (2 * I * 2 * PI * phix)) / 32.
             self.f2000.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
-
-            dumm = -sum(K1SL * (BETX ** 0.5) * (BETY ** 0.5) * E ** (I * 2 * PI * (phix - phiy))) / 4.
-            self.f1001.append(dumm / (1. - E ** (2 * PI * I * (Q1 - Q2))))
-
-            dumm = -sum(K1SL * (BETX ** 0.5) * (BETY ** 0.5) * E ** (I * 2 * PI * (phix + phiy))) / 4.
-            self.f1010.append(dumm / (1. - E ** (2 * PI * I * (Q1 + Q2))))
+            dumm = -sum(K3L * BETX ** 2 * E ** (4 * I * 2 * PI * (phix))) / 384.
+            self.f4000.append(dumm / (1. - E ** (4 * I * 2 * PI * Q1)))
+            dumm = -sum(K3L * BETX ** 2 * E ** (2 * I * 2 * PI * phix)) / 96
+            self.f3100.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
+            dumm = sum(K3L * BETX * BETY * E ** (2 * I * 2 * PI * (phix + phiy))) / 64
+            self.f2020.append(dumm / (1. - E ** (2 * I * 2 * PI * (Q1 + Q2))))
+            dumm = sum(K3L * BETX * BETY * E ** (-2 * I * 2 * PI * phiy)) / 32
+            self.f1102.append(dumm / (1. - E ** (-2 * I * 2 * PI * Q2)))
+            dumm = sum(K3L * BETX * BETY * E ** (2 * I * 2 * PI * phix)) / 32
+            self.f2011.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))            
+            dumm = sum(K3L * BETX * BETY * E ** (2 * I * 2 * PI * (phix - phiy))) / 64
+            self.f2002.append(dumm / (1. - E ** (2 * I * 2 * PI * (Q1 - Q2))))
+            dumm = -sum(K3L * BETY ** 2 * E ** (2 * I * 2 * PI * phiy)) / 96
+            self.f0031.append(dumm / (1. - E ** (2 * I * 2 * PI * Q2)))
+            dumm = -sum(K3L * BETY ** 2 * E ** (4 * I * 2 * PI * (phiy))) / 384.
+            self.f0040.append(dumm / (1. - E ** (4 * I * 2 * PI * Q2)))
 
         self.f3000 = numpy.array(self.f3000)
         self.f2100 = numpy.array(self.f2100)
         self.f1020 = numpy.array(self.f1020)
         self.f1002 = numpy.array(self.f1002)
         self.f1011 = numpy.array(self.f1011)
-
-        self.f1001 = numpy.array(self.f1001)
-        self.f1010 = numpy.array(self.f1010)
+        self.f4000 = numpy.array(self.f4000)
+        self.f3100 = numpy.array(self.f3100)
+        self.f2020 = numpy.array(self.f2020)
+        self.f1102 = numpy.array(self.f1102)
+        self.f2011 = numpy.array(self.f2011)
+        self.f2002 = numpy.array(self.f2002)
+        self.f0031 = numpy.array(self.f0031)
+        self.f0040 = numpy.array(self.f0040)
 
         self.f0120 = numpy.conjugate(self.f1002)
         self.f0111 = numpy.conjugate(self.f1011)
@@ -264,6 +286,125 @@ class twiss:
         self.fRS2 = self.f1020 - self.f0120
         self.fRS1 = 2 * self.f1020 - self.f1011
         self.fRS1 = 2 * self.f0120 - self.f0111
+
+
+    def fterms_generic(self,fterms_list=['3000','2100','1020','1002','1011','2000','4000','0120','0111','1200'], conjugate_list=['0120','0111','1200']):
+   
+        for fterm in fterms_list:
+            setattr(self, 'f'+fterm, [])
+
+        self.f20001 = []
+
+        S = getattr(self, "S")
+        MUX = getattr(self, "MUX")
+        MUY = getattr(self, "MUY")
+        Q1 = getattr(self, "Q1")
+        Q2 = getattr(self, "Q2")
+        K1L = getattr(self, "K1L") 
+        K2L = getattr(self, "K2L")
+        K3L = getattr(self, "K3L")
+        K1SL = getattr(self, "K1SL") 
+        K2SL = getattr(self, "K2SL")
+        K3SL = getattr(self, "K3SL")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        DX = getattr(self, "DX")
+        KL = [K1L, K2L, K3L]
+        KSL = [K1SL, K2SL, K3SL]
+        
+        print 'sum of K2L:  ' , sum(abs(K2L))
+        print 'sum of K3L:  ' , sum(abs(K3L))
+        
+        for i in range(0, len(S)):
+            phix = MUX - MUX[i]
+            phiy = MUY - MUY[i]
+            for j in range(0, i):
+                phix[j] += Q1
+                phiy[j] += Q2
+            
+            for fterm in fterms_list:
+                [j,k,l,m] = [int(i) for i in fterm]
+                n = j+k+l+m
+                factor = -(I**(l+m)) / ( factorial(j)*factorial(k)*factorial(l)*factorial(m) * 2**n )
+                if (l+m)%2==0:
+                    factor = factor.real
+                    dumm = sum(KL[n-2]  * BETX**((j+k)/2.) * BETY**((l+m)/2.) * E**(I*2*PI*((j-k)*phix + (l-m)*phiy)) ) * factor
+                    getattr(self, 'f'+fterm).append(dumm / (1. - E**(I*2*PI*((j-k)*Q1 + (l-m)*Q2))) )
+                elif (l+m)%2==1:
+                    factor = factor.imag
+                    dumm = sum(KSL[n-2] * BETX**((j+k)/2.) * BETY**((l+m)/2.) * E**(I*2*PI*((j-k)*phix + (l-m)*phiy)) ) * factor     
+                    getattr(self, 'f'+fterm).append(dumm / (1. - E**(I*2*PI*((j-k)*Q1 + (l-m)*Q2))) )
+        
+
+        #Legacy from old non-Generic version for backwards compatibility
+        dumm = sum((K1L - 2 * K2L * DX) * BETX * E ** (2 * I * 2 * PI * phix)) / 8.
+        self.f20001.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
+        self.f20001 = numpy.array(self.f20001)
+
+        for fterm in fterms_list:
+            setattr(self, 'f'+fterm, numpy.array(getattr(self, 'f'+fterm)))
+       
+        self.fRS3 = 3 * self.f3000 - self.f2100
+        self.fRS2 = self.f1020 - self.f0120
+        self.fRS1 = 2 * self.f1020 - self.f1011
+        self.fRS1 = 2 * self.f0120 - self.f0111
+        
+
+    def fterms_generic_test(self,fterms_list=['3000','2100','1020','1002','1011','2000','4000','0120','0111','1200'], conjugate_list=['0120','0111','1200']):
+   
+        for fterm in fterms_list:
+            setattr(self, 'f'+fterm, [])
+
+        self.f20001 = []
+
+        S = getattr(self, "S")
+        MUX = getattr(self, "MUX")
+        MUY = getattr(self, "MUY")
+        Q1 = getattr(self, "Q1")
+        Q2 = getattr(self, "Q2")
+        K1L = getattr(self, "K1L") 
+        K2L = getattr(self, "K2L")
+        K3L = getattr(self, "K3L")
+        BETX = getattr(self, "BETX")
+        BETY = getattr(self, "BETY")
+        DX = getattr(self, "DX")
+        KL = [K1L, K2L, K3L]
+        
+        print 'sum of K2L:  ' , sum(abs(K2L))
+        
+        for i in range(len(S)):
+            phix = MUX - MUX[i]
+            phiy = MUY - MUY[i]
+            
+            tune_mask = numpy.concatenate([numpy.ones(i), numpy.zeros(len(S)-i)])
+            phix = phix + tune_mask*Q1 
+            phiy = phiy + tune_mask*Q2 
+            
+            for fterm in fterms_list:
+                [j,k,l,m] = [int(i) for i in fterm]
+                n = j+k+l+m
+                factor = -(I ** (l+m) ) / (factorial(j) * factorial(k) * factorial(l) * factorial(m) * 2 ** n )
+                if (l+m)%2==0:
+                    factor = factor.real
+                    dumm = sum(KL[n-2] * BETX ** ((j+k)/2.) * BETY ** ((l+m)/2.) * E ** (I * 2 * PI * ( (j-k) * phix + (l-m) * phiy ) ) ) * factor
+                    getattr(self, 'f'+fterm).append(dumm / (1. - E ** (I * 2 * PI * ((j-k) * Q1 + (l-m) * Q2)) ) )
+                elif (l+m)%2==1:
+                    factor = factor.imag
+                    dumm = sum(KL[n-2] * BETX ** ((j+k)/2.) * BETY ** ((l+m)/2.) * E ** (I * 2 * PI * ((j-k) * phix + (l-m) * phiy)) ) * factor     
+                    getattr(self, 'f'+fterm).append(dumm / (1. - E ** (I * 2 * PI * ((j-k) * Q1 + (l-m) * Q2)) ) )
+                    
+        dumm = sum((K1L - 2 * K2L * DX) * BETX * E ** (2 * I * 2 * PI * phix)) / 8.
+        self.f20001.append(dumm / (1. - E ** (2 * I * 2 * PI * Q1)))
+        self.f20001 = numpy.array(self.f20001)
+
+        for fterm in fterms_list:
+            setattr(self, 'f'+fterm, numpy.array(getattr(self, 'f'+fterm)))
+       
+        self.fRS3 = 3 * self.f3000 - self.f2100
+        self.fRS2 = self.f1020 - self.f0120
+        self.fRS1 = 2 * self.f1020 - self.f1011
+        self.fRS1 = 2 * self.f0120 - self.f0111
+        
 
     def chiterms(self, ListOfBPMS=None):
         '''
@@ -376,7 +517,7 @@ class twiss:
         J = numpy.reshape(numpy.array([0, 1, -1, 0]), (2, 2))
         for j in range(0, len(S)):
             R = numpy.array([[R11[j], R12[j]], [R21[j], R22[j]]])
-
+            
             C = matrixmultiply(-J, matrixmultiply(numpy.transpose(R), J))
             C = (1 / numpy.sqrt(1 + determinant(R))) * C
 
@@ -392,7 +533,7 @@ class twiss:
             g22 = numpy.sqrt(BETY[j])
             Gb = numpy.reshape(numpy.array([g11, g12, g21, g22]), (2, 2))
             C = matrixmultiply(Ga, matrixmultiply(C, inverse(Gb)))
-            gamma = numpy.sqrt(1 - determinant(C))
+            gamma = 1 - determinant(C)
             self.gamma.append(gamma)
             C = numpy.ravel(C)
             self.C.append(C)
